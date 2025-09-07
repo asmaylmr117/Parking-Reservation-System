@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Wifi, WifiOff, Clock, Activity } from 'lucide-react';
 import useGateStore from '../stores/gateStore';
-
+   
 const GateHeader = ({ gate }) => {
   const { isConnected } = useGateStore();
   const [currentTime, setCurrentTime] = useState(new Date());
