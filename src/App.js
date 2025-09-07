@@ -9,7 +9,7 @@ import LoginPage from './pages/LoginPage';
 import GatePage from './pages/GatePage';
 import CheckpointPage from './pages/CheckpointPage';
 import AdminDashboard from './pages/AdminDashboard';
-
+ 
 // Import components
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
