@@ -18,7 +18,7 @@ const RateManagement = ({
       rateSpecial: category.rateSpecial
     });
   };
-
+ 
   const handleCategorySave = async () => {
     if (!editingCategory) return;
 
