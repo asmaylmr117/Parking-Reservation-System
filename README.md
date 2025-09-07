@@ -2,7 +2,7 @@
 
 A comprehensive React.js frontend application for the WeLink Cargo Parking Reservation System, featuring real-time updates, modern UI, and complete parking management functionality.
 
-## 🚀 Features
+##  Features
 
 ### Core Functionality
 - **Gate Check-in System**: Visitor and subscriber parking reservations
@@ -17,7 +17,7 @@ A comprehensive React.js frontend application for the WeLink Cargo Parking Reser
 - **Employees**: Can process checkouts and manage checkpoint operations
 - **Administrators**: Full system access including zone management, user management, and reporting
 
-## 🛠️ Tech Stack
+##  Tech Stack
 - **React 18.2.0** - Frontend framework
 - **React Router Dom 6.20.1** - Client-side routing
 - **React Query 3.39.3** - Server state management and data fetching
@@ -55,7 +55,7 @@ Ensure the backend server is running on `http://localhost:3000`. The frontend ex
 - **API Base URL**: `http://localhost:3000/api/v1`
 - **WebSocket URL**: `ws://localhost:3000/api/v1/ws`
 
-## 🔐 Demo Users
+##  Demo Users
 The application includes pre-configured demo users for testing:
 
 ### Administrators
@@ -72,7 +72,7 @@ The application includes pre-configured demo users for testing:
 - `sub_002` - Active Regular subscriber (Sara)
 - `sub_003` - Active VIP subscriber (Ahmed)
 
-## 📱 Application Screens
+##  Application Screens
 
 ### 1. Gate Screen (`/gate/:gateId`)
 **Purpose**: Primary interface for parking check-ins  
@@ -128,7 +128,7 @@ The application includes pre-configured demo users for testing:
   - Rush Hours: Configure peak hour schedules
   - Vacation Periods: Set special rate periods
 
-## 🔌 Real-time Features
+##  Real-time Features
 
 ### WebSocket Integration
 The application maintains a persistent WebSocket connection for real-time updates:
@@ -150,7 +150,7 @@ The application maintains a persistent WebSocket connection for real-time update
   }, [zones]);
   ```
 
-## 🎨 UI/UX Features
+##  UI/UX Features
 
 ### Design System
 - **Color Palette**: Primary blue theme with semantic colors
@@ -169,7 +169,7 @@ The application maintains a persistent WebSocket connection for real-time update
 - **Tablet Support**: Adapted layouts for tablets
 - **Desktop Enhancement**: Full feature set on desktop
 
-## 🧪 Testing
+##  Testing
 
 ### Manual Testing Scenarios
 #### Gate Check-in Flow
@@ -198,7 +198,7 @@ curl http://localhost:3000/api/v1/master/gates
 curl http://localhost:3000/api/v1/master/zones?gateId=gate_1
 ```
 
-## 🚀 Build and Deployment
+##  Build and Deployment
 
 ### Production Build
 ```bash
@@ -212,7 +212,7 @@ REACT_APP_API_BASE_URL=http://localhost:3000/api/v1
 REACT_APP_WS_URL=ws://localhost:3000/api/v1/ws
 ```
 
-## 🔧 Development Guidelines
+##  Development Guidelines
 
 ### State Management Strategy
 - **React Query**: Server state and API caching
@@ -234,9 +234,9 @@ await checkinMutation.mutateAsync(checkinData);
 - Toast notifications for user feedback
 - Graceful degradation for offline scenarios
 
-## 📋 Requirements Compliance
+##  Requirements Compliance
 
-### ✅ Technical Requirements Met
+###  Technical Requirements Met
 - React.js with functional components and hooks
 - React Query for data fetching and caching
 - Zustand for state management
@@ -245,7 +245,7 @@ await checkinMutation.mutateAsync(checkinData);
 - Responsive design
 - No client-side business logic
 
-### ✅ Functional Requirements Met
+###  Functional Requirements Met
 - Gate check-in (visitor & subscriber flows)
 - Checkpoint checkout with rate calculations
 - Admin dashboard with all control features
@@ -253,20 +253,20 @@ await checkinMutation.mutateAsync(checkinData);
 - Printable ticket generation
 - Real-time zone updates via WebSocket
 
-### ✅ UX Requirements Met
+###  UX Requirements Met
 - Loading states and error handling
 - Accessible keyboard navigation
 - Clean, professional UI design
 - Mobile-responsive layout
 
-## 🤝 Contributing
+##  Contributing
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
 3. Make your changes with proper commit messages
 4. Push to the branch: `git push origin feature-name`
 5. Submit a pull request
 
-## 📝 Implementation Notes
+## Implementation Notes
 
 ### Key Design Decisions
 - **Component Architecture**: Modular components with clear separation of concerns
