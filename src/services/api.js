@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import useAuthStore from '../stores/authStore';
 import toast from 'react-hot-toast';
-
+ 
 const BASE_URL = 'http://localhost:3000/api/v1';
 
 // Create axios instance
