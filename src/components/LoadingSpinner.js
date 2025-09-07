@@ -1,6 +1,6 @@
 import React from 'react';
 import { Car } from 'lucide-react';
-
+ 
 const LoadingSpinner = ({ message = "Loading...", fullScreen = true }) => {
   const content = (
     <div className="flex flex-col items-center justify-center p-8">
