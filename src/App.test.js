@@ -14,7 +14,7 @@ const renderWithProviders = (component) => {
       },
     },
   });
-
+ 
   return render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
