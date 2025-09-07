@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import useAuthStore from '../stores/authStore';
 import useGateStore from '../stores/gateStore';
-
+ 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
