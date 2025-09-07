@@ -9,7 +9,7 @@ import TicketModal from '../components/TicketModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { Users, User, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
-
+ 
 const GatePage = () => {
   const { gateId } = useParams();
   const [subscriptionId, setSubscriptionId] = useState('');
