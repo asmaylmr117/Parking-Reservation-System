@@ -12,7 +12,7 @@ import {
   UserX,
   Plus
 } from 'lucide-react';
-
+ 
 const EmployeeList = ({ 
   users = [], 
   onEditUser, 
