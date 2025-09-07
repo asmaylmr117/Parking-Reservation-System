@@ -44,7 +44,7 @@ const SystemStatus = ({ zones = [], rushHours = [], vacations = [] }) => {
       subtitleColor: 'text-orange-600'
     }
   ];
-
+ 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       {statusCards.map((card, index) => {
