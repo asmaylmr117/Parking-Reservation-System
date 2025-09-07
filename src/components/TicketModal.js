@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Printer, Download, MapPin, Clock, User, Car } from 'lucide-react';
 import { format } from 'date-fns';
-
+ 
 const TicketModal = ({ isOpen, onClose, ticketData }) => {
   if (!isOpen || !ticketData) return null;
 
