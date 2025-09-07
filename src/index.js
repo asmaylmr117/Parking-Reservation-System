@@ -11,7 +11,7 @@ root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
-);
+); 
 
 // Web Vitals reporting (optional)
 // Uncomment if you want to start measuring performance in your app
