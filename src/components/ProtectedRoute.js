@@ -4,7 +4,7 @@ import useAuthStore from '../stores/authStore';
 
 const ProtectedRoute = ({ children, roles = [] }) => {
   const { isAuthenticated, user } = useAuthStore();
-
+ 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
