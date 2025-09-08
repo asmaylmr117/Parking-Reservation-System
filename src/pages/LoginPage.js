@@ -16,11 +16,11 @@ const LoginPage = () => {
 
   // Demo users for easy testing
   const demoUsers = [
-    { username: 'admin1', password: 'admin123', role: 'admin', name: 'Admin User' },
-    { username: 'admin2', password: 'admin123', role: 'admin', name: 'Admin User 2' },
-    { username: 'emp1', password: 'emp123', role: 'employee', name: 'Employee 1' },
-    { username: 'emp2', password: 'emp123', role: 'employee', name: 'Employee 2' },
-    { username: 'checkpoint1', password: 'checkpoint123', role: 'employee', name: 'Checkpoint Staff' },
+    { username: 'admin', password: 'adminpass', role: 'admin', name: 'Admin User' },
+    { username: 'superadmin', password: 'superpass', role: 'admin', name: 'Admin User 2' },
+    { username: 'emp1', password: 'pass1', role: 'employee', name: 'Employee 1' },
+    { username: 'emp2', password: 'pass1', role: 'employee', name: 'Employee 2' },
+    { username: 'checkpoint1', password: 'checkpoint1', role: 'employee', name: 'Checkpoint Staff' },
   ];
 
   const handleChange = (e) => {
