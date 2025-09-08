@@ -195,5 +195,4 @@ const RushHourManagement = ({
     </div>
   );
 };
-
 export default RushHourManagement;
