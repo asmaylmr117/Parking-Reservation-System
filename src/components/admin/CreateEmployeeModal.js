@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Eye, EyeOff, Shield, User } from 'lucide-react';
-
+ 
 const CreateEmployeeModal = ({ isOpen, onClose, onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({
     username: '',
