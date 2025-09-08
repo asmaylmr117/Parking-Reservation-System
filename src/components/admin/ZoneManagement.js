@@ -19,7 +19,6 @@ const ZoneManagement = ({ zones = [], onToggleZone, isLoading = false }) => {
       setSelectedZones(selectedZones.filter(id => id !== zoneId));
     }
   };
-
   const handleBulkAction = async (action) => {
     if (selectedZones.length === 0) return;
     
