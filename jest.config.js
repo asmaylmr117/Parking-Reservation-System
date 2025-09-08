@@ -11,7 +11,7 @@ module.exports = {
         ['@babel/preset-react', { runtime: 'automatic' }]
       ]
     }],
-  },
+  }, 
   collectCoverageFrom: [
     'src/**/*.{js,jsx}',
     '!src/index.js',
