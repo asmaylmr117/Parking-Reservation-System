@@ -11,7 +11,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import LoadingSpinner from '../LoadingSpinner';
-
+ 
 const ParkingStateReport = () => {
   const { data: parkingState, isLoading, error, refetch } = useParkingState();
 
