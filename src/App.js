@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 
 // Import pages
 import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/Signuppage';
 import GatePage from './pages/GatePage';
 import CheckpointPage from './pages/CheckpointPage';
 import AdminDashboard from './pages/AdminDashboard';
@@ -26,7 +27,7 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000, 
     },
   },
 });
@@ -71,6 +72,12 @@ function App() {
                 isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />
               } 
             />
+            <Route 
+              path="/signup" 
+              element={
+                isAuthenticated ? <Navigate to="/" replace /> : <SignUpPage />
+              } 
+            />
             
             {/* Protected routes */}
             <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
@@ -79,7 +86,7 @@ function App() {
               <Route 
                 path="checkpoint" 
                 element={
-                  <ProtectedRoute roles={['employee', 'admin']}>
+                   <ProtectedRoute roles={['user', 'employee', 'admin']}>
                     <CheckpointPage />
                   </ProtectedRoute>
                 } 

@@ -12,7 +12,6 @@ const TicketModal = ({ isOpen, onClose, ticketData }) => {
   };
 
   const handleDownload = () => {
-    // In a real app, this would generate and download a PDF
     const ticketContent = generateTicketContent();
     const blob = new Blob([ticketContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -26,6 +25,14 @@ const TicketModal = ({ isOpen, onClose, ticketData }) => {
   };
 
   const generateTicketContent = () => {
+    const subscriberSection = subscription ? `
+SUBSCRIBER INFO
+---------------
+Name: ${subscription.userName || 'N/A'}
+Subscription ID: ${subscription.id || 'N/A'}
+Car: ${subscription.cars?.[0]?.plate || 'N/A'} (${subscription.cars?.[0]?.brand || 'N/A'} ${subscription.cars?.[0]?.model || 'N/A'})
+` : '';
+
     return `
 PARKING TICKET
 ==============
@@ -39,15 +46,7 @@ LOCATION
 Gate: ${gate.name}
 Zone: ${zone.name}
 Category: ${zone.categoryId.replace('cat_', '').toUpperCase()}
-
-${subscription ? `
-SUBSCRIBER INFO
----------------
-Name: ${subscription.userName}
-Subscription ID: ${subscription.id}
-Car: ${subscription.cars?.[0]?.plate || 'N/A'} (${subscription.cars?.[0]?.brand || 'N/A'} ${subscription.cars?.[0]?.model || 'N/A'})
-` : ''}
-
+${subscriberSection}
 RATES
 -----
 Normal Rate: $${zone.rateNormal}/hour

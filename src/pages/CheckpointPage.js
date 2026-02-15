@@ -122,7 +122,7 @@ const CheckpointPage = () => {
                   id="ticketId"
                   type="text"
                   value={ticketId}
-                  onChange={(e) => setTicketId(e.target.value.toUpperCase())}
+                  onChange={(e) => setTicketId(e.target.value)}
                   placeholder="Enter or scan ticket ID (e.g., T_001)"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}

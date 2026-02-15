@@ -2,13 +2,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+/**
+ * Auth Store using Zustand
+ * Manages authentication state with persistence
+ */
+
 const useAuthStore = create(
   persist(
     (set, get) => ({
+      // State
       user: null,
       token: null,
       isAuthenticated: false,
-      
+
+      // Actions
       login: (user, token) => {
         set({
           user,
@@ -16,7 +23,7 @@ const useAuthStore = create(
           isAuthenticated: true,
         });
       },
-      
+
       logout: () => {
         set({
           user: null,
@@ -24,20 +31,22 @@ const useAuthStore = create(
           isAuthenticated: false,
         });
       },
-      
-      isAdmin: () => {
-        const { user } = get();
-        return user?.role === 'admin';
+
+      updateUser: (userData) => {
+        set((state) => ({
+          user: state.user ? { ...state.user, ...userData } : null,
+        }));
       },
-      
-      isEmployee: () => {
-        const { user } = get();
-        return user?.role === 'employee';
-      },
+
+      // Getters
+      getUser: () => get().user,
+      getToken: () => get().token,
+      isAdmin: () => get().user?.role === 'admin',
+      isEmployee: () => get().user?.role === 'employee',
     }),
     {
-      name: 'auth-storage', // unique name
-      // Storage will be localStorage by default
+      name: 'auth-storage', // localStorage key
+      getStorage: () => localStorage, // Use localStorage
     }
   )
 );

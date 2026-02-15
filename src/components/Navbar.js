@@ -35,7 +35,7 @@ const Navbar = () => {
       icon: Car,
       current: location.pathname.includes('/gate'),
     },
-    ...(isEmployee() || isAdmin() ? [{
+    ...(isEmployee() || isAdmin() || user?.role === 'user' ? [{
       name: 'Checkpoint',
       href: '/checkpoint',
       icon: ClipboardCheck,

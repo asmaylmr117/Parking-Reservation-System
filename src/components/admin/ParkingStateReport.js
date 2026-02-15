@@ -41,7 +41,10 @@ const ParkingStateReport = () => {
     );
   }
 
-  if (!parkingState?.zones) {
+  
+  const zones = Array.isArray(parkingState) ? parkingState : [];
+
+  if (!zones || zones.length === 0) {
     return (
       <div className="text-center py-12">
         <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -51,14 +54,12 @@ const ParkingStateReport = () => {
     );
   }
 
-  const zones = parkingState.zones;
-
   // Calculate overall statistics
   const stats = zones.reduce((acc, zone) => {
-    acc.totalSlots += zone.totalSlots;
-    acc.occupied += zone.occupied;
-    acc.free += zone.free;
-    acc.reserved += zone.reserved;
+    acc.totalSlots += zone.totalSlots || 0;
+    acc.occupied += zone.occupied || 0;
+    acc.free += zone.free || 0;
+    acc.reserved += zone.reserved || 0;
     acc.subscriberCount += zone.subscriberCount || 0;
     if (!zone.open) acc.closedZones++;
     return acc;
@@ -71,8 +72,12 @@ const ParkingStateReport = () => {
     closedZones: 0
   });
 
-  const occupancyRate = ((stats.occupied / stats.totalSlots) * 100).toFixed(1);
-  const availabilityRate = ((stats.free / stats.totalSlots) * 100).toFixed(1);
+  const occupancyRate = stats.totalSlots > 0 
+    ? ((stats.occupied / stats.totalSlots) * 100).toFixed(1) 
+    : '0.0';
+  const availabilityRate = stats.totalSlots > 0 
+    ? ((stats.free / stats.totalSlots) * 100).toFixed(1) 
+    : '0.0';
 
   const getOccupancyColor = (rate) => {
     if (rate >= 90) return 'text-red-600 bg-red-100';
@@ -81,6 +86,7 @@ const ParkingStateReport = () => {
   };
 
   const getZoneOccupancyRate = (zone) => {
+    if (!zone.totalSlots || zone.totalSlots === 0) return '0.0';
     return ((zone.occupied / zone.totalSlots) * 100).toFixed(1);
   };
 
@@ -177,9 +183,6 @@ const ParkingStateReport = () => {
                   Zone
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -201,7 +204,7 @@ const ParkingStateReport = () => {
                 const occupancyRate = getZoneOccupancyRate(zone);
                 
                 return (
-                  <tr key={zone.id} className="hover:bg-gray-50">
+                  <tr key={zone.zoneId || zone.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <MapPin className="w-4 h-4 text-gray-400 mr-2" />
@@ -209,15 +212,9 @@ const ParkingStateReport = () => {
                           <div className="text-sm font-medium text-gray-900">
                             {zone.name}
                           </div>
-                          <div className="text-sm text-gray-500">{zone.id}</div>
+                          <div className="text-sm text-gray-500">{zone.zoneId || zone.id}</div>
                         </div>
                       </div>
-                    </td>
-                    
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                        {zone.categoryId?.replace('cat_', '') || 'Unknown'}
-                      </span>
                     </td>
                     
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -243,7 +240,7 @@ const ParkingStateReport = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="text-sm text-gray-900">
-                          {zone.occupied}/{zone.totalSlots}
+                          {zone.occupied || 0}/{zone.totalSlots || 0}
                         </div>
                         <div className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getOccupancyColor(occupancyRate)}`}>
                           {occupancyRate}%
@@ -257,15 +254,15 @@ const ParkingStateReport = () => {
                             occupancyRate >= 90 ? 'bg-red-500' : 
                             occupancyRate >= 70 ? 'bg-yellow-500' : 'bg-green-500'
                           }`}
-                          style={{ width: `${occupancyRate}%` }}
+                          style={{ width: `${Math.min(occupancyRate, 100)}%` }}
                         ></div>
                       </div>
                     </td>
                     
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        <div>Visitors: <span className="font-medium">{zone.availableForVisitors}</span></div>
-                        <div>Subscribers: <span className="font-medium">{zone.availableForSubscribers}</span></div>
+                        <div>Visitors: <span className="font-medium">{zone.availableForVisitors || 0}</span></div>
+                        <div>Subscribers: <span className="font-medium">{zone.availableForSubscribers || 0}</span></div>
                       </div>
                     </td>
                     
@@ -277,7 +274,7 @@ const ParkingStateReport = () => {
                     
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-blue-600">
-                        {zone.reserved}
+                        {zone.reserved || 0}
                       </div>
                     </td>
                   </tr>

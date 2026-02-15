@@ -3,9 +3,9 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import useAuthStore from '../stores/authStore';
 import toast from 'react-hot-toast';
  
-const BASE_URL = 'http://localhost:3000/api/v1';
+const BASE_URL = 'https://exuberant-wallis-alanani-17867927.koyeb.app/api/v1'; // Update with your actual backend URL
 
-// Create axios instance
+
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
@@ -40,6 +40,7 @@ api.interceptors.response.use(
 // Auth API
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
+  signup: (userData) => api.post('/auth/signup', userData),
 };
 
 // Master Data API
@@ -108,6 +109,18 @@ export const useLogin = () => {
   });
 };
 
+export const useSignUp = () => {
+  return useMutation(authAPI.signup, {
+    onSuccess: (response) => {
+      toast.success('Account created successfully! Please login.');
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Sign up failed';
+      toast.error(message);
+    },
+  });
+};
+
 // Master data hooks
 export const useGates = () => {
   return useQuery('gates', () => masterAPI.getGates().then(res => res.data), {
@@ -148,18 +161,26 @@ export const useCheckin = () => {
   
   return useMutation(ticketAPI.checkin, {
     onSuccess: (response, variables) => {
-      const { ticket, zoneState } = response.data;
+      const { ticket, zone, gate, subscription } = response.data;
       
-      // Update zones cache
+      // Update zones cache with proper null checks
       queryClient.setQueryData(['zones', variables.gateId], (oldData) => {
-        if (!oldData) return oldData;
-        return oldData.map(zone => 
-          zone.id === zoneState.id ? zoneState : zone
-        );
+        if (!oldData || !Array.isArray(oldData)) return oldData;
+        
+        return oldData.map(z => {
+          
+          if (z && zone && z.id === zone.id) {
+            return zone;
+          }
+          return z;
+        });
       });
       
+      // Invalidate to trigger refetch
+      queryClient.invalidateQueries(['zones', variables.gateId]);
+      
       toast.success('Check-in successful!');
-      return { ticket, zoneState };
+      return { ticket, zone, gate, subscription };
     },
     onError: (error) => {
       const message = error.response?.data?.message || 'Check-in failed';

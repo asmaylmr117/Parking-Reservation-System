@@ -116,9 +116,7 @@ const GatePage = () => {
   };
 
   const handleCheckin = async () => {
-    if (!canProceedWithCheckin()) {
-      return;
-    }
+    if (!canProceedWithCheckin()) return;
 
     try {
       const checkinData = {
@@ -128,31 +126,63 @@ const GatePage = () => {
         ...(selectedTab === 'subscriber' && { subscriptionId })
       };
 
+      console.log('Sending checkin request:', checkinData);
+
+     
       const response = await checkinMutation.mutateAsync(checkinData);
+
+      console.log('Full response from mutateAsync:', response);
       
-      // Show gate animation
-      setIsGateAnimating(true);
-      setTimeout(() => setIsGateAnimating(false), 2000);
-
-      // Show ticket modal
-      setTicketData({
-        ticket: response.ticket,
-        zone: selectedZone,
-        gate: currentGate,
-        subscription: selectedTab === 'subscriber' ? verifiedSubscription : null
-      });
-      setShowTicketModal(true);
-
-      // Reset form
-      setSelectedZone(null);
-      setSubscriptionId('');
-      setVerifiedSubscription(null);
       
-      // Refresh zones data
-      refetchZones();
+      
+      const responseData = response?.data;
+      
+      console.log('=== DEBUG INFO ===');
+      console.log('response exists?', !!response);
+      console.log('response.data exists?', !!response?.data);
+      console.log('responseData:', responseData);
+      console.log('responseData.ticket exists?', !!responseData?.ticket);
+      console.log('typeof responseData:', typeof responseData);
+      console.log('responseData keys:', responseData ? Object.keys(responseData) : 'null');
+      console.log('=================');
+      
+      if (responseData && responseData.ticket) {
+       
+        const newTicketData = {
+          ticket: responseData.ticket,
+          zone: responseData.zone || selectedZone,
+          gate: responseData.gate || currentGate,
+          subscription: responseData.subscription || (selectedTab === 'subscriber' ? verifiedSubscription : null)
+        };
 
+        console.log('Ticket data prepared successfully:', newTicketData);
+
+       
+        setTicketData(newTicketData);
+        setShowTicketModal(true);
+
+       
+        setIsGateAnimating(true);
+        setTimeout(() => setIsGateAnimating(false), 2000);
+
+       
+        setSelectedZone(null);
+        setSubscriptionId('');
+        setVerifiedSubscription(null);
+        
+       
+        refetchZones();
+        
+        toast.success('Check-in successful!');
+      } else {
+        console.error('Invalid response - missing ticket. Full response:', response);
+        console.error('ResponseData:', responseData);
+        toast.error('Check-in failed: Invalid server response');
+      }
     } catch (error) {
-      // Error handling is done in the mutation
+      console.error("Checkin failed with error:", error);
+      console.error("Error response:", error?.response);
+      toast.error(error?.response?.data?.message || 'Check-in failed');
     }
   };
 
