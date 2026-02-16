@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Wifi, WifiOff, Clock, Activity } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { MapPin, Wifi, WifiOff, Clock, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 import useGateStore from '../stores/gateStore';
+import { useGates } from '../services/api';
    
 const GateHeader = ({ gate }) => {
+  const navigate = useNavigate();
   const { isConnected } = useGateStore();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const { data: gates } = useGates();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -26,6 +30,18 @@ const GateHeader = ({ gate }) => {
       hour12: false
     });
   };
+
+  const handleGateNavigation = (gateId) => {
+    navigate(`/gate/${gateId}`);
+  };
+
+  // Find current gate index
+  const currentGateIndex = gates?.findIndex(g => g.id === gate.id) ?? -1;
+  const hasPrevious = currentGateIndex > 0;
+  const hasNext = currentGateIndex < (gates?.length - 1);
+
+  const previousGate = hasPrevious ? gates[currentGateIndex - 1] : null;
+  const nextGate = hasNext ? gates[currentGateIndex + 1] : null;
 
   return (
     <div className="bg-white border-b border-gray-200 shadow-sm">
@@ -86,16 +102,74 @@ const GateHeader = ({ gate }) => {
             </div>
           </div>
 
-          {/* Gate Info Bar */}
+          {/* Gate Navigation Bar */}
           <div className="bg-gray-50 rounded-lg px-4 py-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center justify-between">
+              {/* Gate Info */}
               <div className="flex items-center space-x-4 text-sm text-gray-600">
                 <span><strong>Gate ID:</strong> {gate.id}</span>
                 <span><strong>Available Zones:</strong> {gate.zoneIds?.length || 0}</span>
               </div>
               
-              <div className="text-sm text-gray-500 mt-2 sm:mt-0">
-                {formatTime(currentTime)}
+              {/* Gate Navigation Buttons */}
+              <div className="flex items-center space-x-2">
+                {/* Previous Gate Button */}
+                <button
+                  onClick={() => previousGate && handleGateNavigation(previousGate.id)}
+                  disabled={!hasPrevious}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                    hasPrevious
+                      ? 'bg-white hover:bg-primary-50 text-gray-700 hover:text-primary-700 border border-gray-300 hover:border-primary-300'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                  }`}
+                  title={previousGate ? `Go to ${previousGate.name}` : 'No previous gate'}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span className="text-sm font-medium">Previous</span>
+                </button>
+
+                {/* Gate Selector Buttons */}
+                <div className="flex items-center space-x-1 bg-white rounded-lg border border-gray-300 p-1">
+                  {gates?.map((g) => (
+                    <button
+                      key={g.id}
+                      onClick={() => handleGateNavigation(g.id)}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        g.id === gate.id
+                          ? 'bg-primary-600 text-white shadow-sm'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                      title={g.name}
+                    >
+                      {g.name.match(/\d+/)?.[0] || g.id.split('_')[1]}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Next Gate Button */}
+                <button
+                  onClick={() => nextGate && handleGateNavigation(nextGate.id)}
+                  disabled={!hasNext}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                    hasNext
+                      ? 'bg-white hover:bg-primary-50 text-gray-700 hover:text-primary-700 border border-gray-300 hover:border-primary-300'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                  }`}
+                  title={nextGate ? `Go to ${nextGate.name}` : 'No next gate'}
+                >
+                  <span className="text-sm font-medium">Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Current Gate Indicator */}
+            <div className="mt-2 text-center">
+              <div className="inline-flex items-center space-x-2 text-xs text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200">
+                <span>Current Gate:</span>
+                <span className="font-semibold text-primary-600">{gate.name}</span>
+                <span className="text-gray-400">|</span>
+                <span>{currentGateIndex + 1} of {gates?.length || 0}</span>
               </div>
             </div>
           </div>

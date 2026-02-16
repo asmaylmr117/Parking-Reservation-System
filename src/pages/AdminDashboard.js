@@ -14,6 +14,7 @@ import {
 import ParkingStateReport from '../components/admin/ParkingStateReport';
 import EmployeeManager from '../components/admin/EmployeeManager';
 import ControlPanel from '../components/admin/ControlPanel';
+import SubscriptionManager from '../components/admin/SubscriptionManager';
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -30,6 +31,12 @@ const AdminDashboard = () => {
       href: '/admin/employees',
       icon: Users,
       description: 'Manage employee accounts'
+    },
+    {
+      name: 'Subscriptions',
+      href: '/admin/subscriptions',
+      icon: Car,
+      description: 'Manage parking subscriptions'
     },
     {
       name: 'Control Panel',
@@ -148,6 +155,7 @@ const AdminDashboard = () => {
             <Routes>
               <Route index element={<ParkingStateReport />} />
               <Route path="employees" element={<EmployeeManager />} />
+              <Route path="subscriptions" element={<SubscriptionManager />} />
               <Route path="control" element={<ControlPanel />} />
             </Routes>
           </div>
