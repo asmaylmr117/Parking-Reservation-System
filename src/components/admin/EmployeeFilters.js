@@ -18,7 +18,7 @@ const EmployeeFilters = ({
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              placeholder="Search employees..."
+              placeholder="Search by name, email or username..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-64"
@@ -33,6 +33,7 @@ const EmployeeFilters = ({
             <option value="all">All Roles</option>
             <option value="admin">Admin</option>
             <option value="employee">Employee</option>
+            <option value="user">User</option> {/* التحديث: إضافة رول اليوزر المعتمد في الباك آند */}
           </select>
 
           <button
@@ -46,12 +47,12 @@ const EmployeeFilters = ({
         
         <div className="flex items-center space-x-4">
           <div className="text-sm text-gray-500">
-            Showing <span className="font-medium">{filteredCount}</span> of <span className="font-medium">{totalUsers}</span> employees
+            Showing <span className="font-medium">{filteredCount}</span> of <span className="font-medium">{totalUsers}</span> accounts
           </div>
         </div>
       </div>
 
-      {/* Advanced Filters (Optional) */}
+      {/* Advanced Filters */}
       {(searchTerm || filterRole !== 'all') && (
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="flex items-center justify-between">

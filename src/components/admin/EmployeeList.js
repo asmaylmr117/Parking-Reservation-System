@@ -12,7 +12,7 @@ import {
   UserX,
   Plus
 } from 'lucide-react';
- 
+
 const EmployeeList = ({ 
   users = [], 
   onEditUser, 
@@ -45,6 +45,20 @@ const EmployeeList = ({
         break;
       default:
         break;
+    }
+  };
+
+  // وظيفة لتحديد لون شارة الدور (Badge) بناءً على القيمة القادمة من الباك آند
+  const getRoleBadgeStyles = (role) => {
+    switch (role) {
+      case 'admin':
+        return 'bg-red-100 text-red-800';
+      case 'employee':
+        return 'bg-blue-100 text-blue-800';
+      case 'user':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -89,14 +103,14 @@ const EmployeeList = ({
           <div key={user.id || index} className="p-6 hover:bg-gray-50 transition-colors">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                {/* Avatar */}
+                {/* Avatar: يتغير اللون حسب الدور (admin = أحمر، employee = أزرق، user = أخضر) */}
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  user.role === 'admin' ? 'bg-red-100' : 'bg-blue-100'
+                  user.role === 'admin' ? 'bg-red-100' : user.role === 'employee' ? 'bg-blue-100' : 'bg-green-100'
                 }`}>
                   {user.role === 'admin' ? (
                     <Shield className="w-6 h-6 text-red-600" />
                   ) : (
-                    <User className="w-6 h-6 text-blue-600" />
+                    <User className={`w-6 h-6 ${user.role === 'employee' ? 'text-blue-600' : 'text-green-600'}`} />
                   )}
                 </div>
 
@@ -106,13 +120,10 @@ const EmployeeList = ({
                     <h4 className="text-lg font-semibold text-gray-900">
                       {user.fullName || user.username}
                     </h4>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      user.role === 'admin' 
-                        ? 'bg-red-100 text-red-800' 
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeStyles(user.role)}`}>
                       {user.role}
                     </span>
+                    {/* تحديث: استخدام حقل active بدلاً من isActive */}
                     {user.active === false && (
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
                         Inactive
@@ -125,8 +136,7 @@ const EmployeeList = ({
                       <div>Email: <span className="text-blue-600">{user.email}</span></div>
                     )}
                     <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <span>Created: {new Date().toLocaleDateString()}</span>
-                      <span>Last login: {new Date().toLocaleDateString()}</span>
+                      <span>Created: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
@@ -134,7 +144,7 @@ const EmployeeList = ({
 
               {/* Status and Actions */}
               <div className="flex items-center space-x-4">
-                {/* Status */}
+                {/* Status: استخدام حقل active */}
                 <div className="flex items-center space-x-2">
                   {user.active !== false ? (
                     <>
@@ -152,13 +162,13 @@ const EmployeeList = ({
                 {/* Actions Dropdown */}
                 <div className="relative">
                   <button
-                    onClick={() => setActiveDropdown(activeDropdown === user.username ? null : user.username)}
+                    onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
                     className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
                   >
                     <MoreVertical className="w-4 h-4" />
                   </button>
 
-                  {activeDropdown === user.username && (
+                  {activeDropdown === user.id && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                       <div className="py-1">
                         <button
@@ -203,7 +213,7 @@ const EmployeeList = ({
               </div>
             </div>
 
-            {/* Permissions */}
+            {/* Permissions & ID */}
             <div className="mt-4 flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <span className="text-xs text-gray-400">Permissions:</span>
@@ -211,10 +221,14 @@ const EmployeeList = ({
                   <div className="flex space-x-1">
                     <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded">Full Access</span>
                   </div>
-                ) : (
+                ) : user.role === 'employee' ? (
                   <div className="flex space-x-1">
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Gate</span>
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Checkpoint</span>
+                  </div>
+                ) : (
+                  <div className="flex space-x-1">
+                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">View Only</span>
                   </div>
                 )}
               </div>

@@ -3,8 +3,7 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import useAuthStore from '../stores/authStore';
 import toast from 'react-hot-toast';
  
-const BASE_URL = 'https://exuberant-wallis-alanani-17867927.koyeb.app/api/v1'; // Update with your actual backend URL
-
+const BASE_URL = 'https://exuberant-wallis-alanani-17867927.koyeb.app/api/v1'; 
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -37,6 +36,8 @@ api.interceptors.response.use(
   }
 );
 
+// --- API Definitions ---
+
 // Auth API
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
@@ -62,14 +63,16 @@ export const ticketAPI = {
   getTicket: (id) => api.get(`/tickets/${id}`),
 };
 
-// Admin API
+// Admin API (شامل لكل الوظائف المطلوبة في الباك آند)
 export const adminAPI = {
   // Reports
   getParkingState: () => api.get('/admin/reports/parking-state'),
   
-  // Users
+  // Users (المسارات المعتمدة في admin.controller.ts)
   getUsers: () => api.get('/admin/users'),
   createUser: (data) => api.post('/admin/users', data),
+  updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
+  deleteUser: (id) => api.delete(`/admin/users/${id}`),
   
   // Categories
   updateCategory: (id, data) => api.put(`/admin/categories/${id}`, data),
@@ -89,12 +92,11 @@ export const adminAPI = {
   getSubscriptions: () => api.get('/admin/subscriptions'),
 };
 
-// React Query Hooks
+// --- React Query Hooks ---
 
 // Auth hooks
 export const useLogin = () => {
   const queryClient = useQueryClient();
-  
   return useMutation(authAPI.login, {
     onSuccess: (response) => {
       const { user, token } = response.data;
@@ -111,8 +113,8 @@ export const useLogin = () => {
 
 export const useSignUp = () => {
   return useMutation(authAPI.signup, {
-    onSuccess: (response) => {
-      toast.success('Account created successfully! Please login.');
+    onSuccess: () => {
+      toast.success('Account created successfully!');
     },
     onError: (error) => {
       const message = error.response?.data?.message || 'Sign up failed';
@@ -124,7 +126,7 @@ export const useSignUp = () => {
 // Master data hooks
 export const useGates = () => {
   return useQuery('gates', () => masterAPI.getGates().then(res => res.data), {
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -134,7 +136,7 @@ export const useZones = (gateId) => {
     () => masterAPI.getZones(gateId).then(res => res.data),
     {
       enabled: !!gateId,
-      staleTime: 30 * 1000, // 30 seconds
+      staleTime: 30 * 1000,
     }
   );
 };
@@ -155,32 +157,14 @@ export const useSubscription = (subscriptionId) => {
   );
 };
 
-// Ticket hooks
+// Ticket hooks (تم تضمين useTicket المفقود هنا)
 export const useCheckin = () => {
   const queryClient = useQueryClient();
-  
   return useMutation(ticketAPI.checkin, {
     onSuccess: (response, variables) => {
-      const { ticket, zone, gate, subscription } = response.data;
-      
-      // Update zones cache with proper null checks
-      queryClient.setQueryData(['zones', variables.gateId], (oldData) => {
-        if (!oldData || !Array.isArray(oldData)) return oldData;
-        
-        return oldData.map(z => {
-          
-          if (z && zone && z.id === zone.id) {
-            return zone;
-          }
-          return z;
-        });
-      });
-      
-      // Invalidate to trigger refetch
       queryClient.invalidateQueries(['zones', variables.gateId]);
-      
       toast.success('Check-in successful!');
-      return { ticket, zone, gate, subscription };
+      return response.data;
     },
     onError: (error) => {
       const message = error.response?.data?.message || 'Check-in failed';
@@ -191,16 +175,10 @@ export const useCheckin = () => {
 
 export const useCheckout = () => {
   const queryClient = useQueryClient();
-  
   return useMutation(ticketAPI.checkout, {
-    onSuccess: (response) => {
-      const { zoneState } = response.data;
-      
-      // Invalidate zones data to refresh occupancy
+    onSuccess: () => {
       queryClient.invalidateQueries('zones');
-      
       toast.success('Checkout successful!');
-      return response.data;
     },
     onError: (error) => {
       const message = error.response?.data?.message || 'Checkout failed';
@@ -220,13 +198,13 @@ export const useTicket = (ticketId) => {
   );
 };
 
-// Admin hooks
+// Admin hooks (متوافقة تماماً مع صفحة إدارة الموظفين)
 export const useParkingState = () => {
   return useQuery(
     'parkingState',
     () => adminAPI.getParkingState().then(res => res.data),
     {
-      refetchInterval: 30000, // Refresh every 30 seconds
+      refetchInterval: 30000,
     }
   );
 };
@@ -237,7 +215,6 @@ export const useUsers = () => {
 
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
-  
   return useMutation(adminAPI.createUser, {
     onSuccess: () => {
       queryClient.invalidateQueries('users');
@@ -250,71 +227,10 @@ export const useCreateUser = () => {
   });
 };
 
-export const useToggleZoneOpen = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation(
-    ({ zoneId, open }) => adminAPI.toggleZoneOpen(zoneId, { open }),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('parkingState');
-        queryClient.invalidateQueries('zones');
-        toast.success('Zone status updated!');
-      },
-      onError: (error) => {
-        const message = error.response?.data?.message || 'Failed to update zone';
-        toast.error(message);
-      },
-    }
-  );
-};
-
-export const useUpdateCategory = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation(
-    ({ categoryId, data }) => adminAPI.updateCategory(categoryId, data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('categories');
-        queryClient.invalidateQueries('zones');
-        toast.success('Category updated successfully!');
-      },
-      onError: (error) => {
-        const message = error.response?.data?.message || 'Failed to update category';
-        toast.error(message);
-      },
-    }
-  );
-};
-
-export const useCreateRushHour = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation(adminAPI.createRushHour, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('rushHours');
-      toast.success('Rush hour added successfully!');
-    },
-  });
-};
-
-export const useCreateVacation = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation(adminAPI.createVacation, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('vacations');
-      toast.success('Vacation period added successfully!');
-    },
-  });
-};
-
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
-
   return useMutation(
-    ({ userId, data }) => api.put(`/admin/users/${userId}`, data),
+    ({ userId, data }) => adminAPI.updateUser(userId, data),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('users');
@@ -330,9 +246,8 @@ export const useUpdateUser = () => {
 
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
-
   return useMutation(
-    (userId) => api.delete(`/admin/users/${userId}`),
+    (userId) => adminAPI.deleteUser(userId),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('users');
@@ -346,5 +261,51 @@ export const useDeleteUser = () => {
   );
 };
 
+export const useToggleZoneOpen = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ zoneId, open }) => adminAPI.toggleZoneOpen(zoneId, { open }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('parkingState');
+        queryClient.invalidateQueries('zones');
+        toast.success('Zone status updated!');
+      },
+    }
+  );
+};
+
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ categoryId, data }) => adminAPI.updateCategory(categoryId, data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('categories');
+        toast.success('Category updated successfully!');
+      },
+    }
+  );
+};
+
+export const useCreateRushHour = () => {
+  const queryClient = useQueryClient();
+  return useMutation(adminAPI.createRushHour, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('rushHours');
+      toast.success('Rush hour added successfully!');
+    },
+  });
+};
+
+export const useCreateVacation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(adminAPI.createVacation, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('vacations');
+      toast.success('Vacation period added successfully!');
+    },
+  });
+};
 
 export default api;

@@ -2,11 +2,13 @@ import React from 'react';
 import { Users, Shield, User, UserCheck, UserX } from 'lucide-react';
 
 const EmployeeStats = ({ users = [] }) => {
+  // حساب الإحصائيات بناءً على الأدوار الثلاثة والحالة المعتمدة في الباك آند
   const userStats = {
     total: users.length,
     admins: users.filter(u => u.role === 'admin').length,
     employees: users.filter(u => u.role === 'employee').length,
-    active: users.filter(u => u.active !== false).length,
+    basicUsers: users.filter(u => u.role === 'user').length, // التحديث: إضافة حساب رول اليوزر
+    active: users.filter(u => u.active !== false).length, // التحديث: استخدام active بدلاً من isActive
     inactive: users.filter(u => u.active === false).length
   };
 
@@ -33,6 +35,13 @@ const EmployeeStats = ({ users = [] }) => {
       iconColor: 'text-green-600'
     },
     {
+      title: 'Basic Users', // التحديث: إضافة بطاقة إحصائية لرول اليوزر
+      value: userStats.basicUsers,
+      icon: User,
+      bgColor: 'bg-purple-100',
+      iconColor: 'text-purple-600'
+    },
+    {
       title: 'Active',
       value: userStats.active,
       icon: UserCheck,
@@ -49,7 +58,7 @@ const EmployeeStats = ({ users = [] }) => {
   ];
  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
       {statCards.map((stat, index) => {
         const Icon = stat.icon;
         return (
