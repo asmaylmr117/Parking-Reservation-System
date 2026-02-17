@@ -3,14 +3,12 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Plus, Users, Calendar, Car, CheckCircle, XCircle, Edit, Trash2, Download, Printer, X } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
-import { useReactToPrint } from 'react-to-print';
 
 const SubscriptionManager = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState(null);
   const [viewingSubscription, setViewingSubscription] = useState(null);
   const queryClient = useQueryClient();
-  const printRef = useRef();
 
   // Fetch subscriptions
   const { data: subscriptions, isLoading } = useQuery('subscriptions', 
@@ -69,23 +67,6 @@ const SubscriptionManager = () => {
 
   const handleView = (subscription) => {
     setViewingSubscription(subscription);
-  };
-
-  // Print function
-  const handlePrint = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: `Subscription-${viewingSubscription?.id}`,
-  });
-
-  // Download as JSON
-  const handleDownload = (subscription) => {
-    const dataStr = JSON.stringify(subscription, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = `subscription-${subscription.id}.json`;
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
   };
 
   if (isLoading) {
@@ -258,13 +239,6 @@ const SubscriptionManager = () => {
                       >
                         <Printer className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => handleDownload(subscription)}
-                        className="text-purple-600 hover:text-purple-900"
-                        title="Download"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -299,9 +273,6 @@ const SubscriptionManager = () => {
         <ViewSubscriptionModal
           subscription={viewingSubscription}
           onClose={() => setViewingSubscription(null)}
-          onPrint={handlePrint}
-          onDownload={() => handleDownload(viewingSubscription)}
-          printRef={printRef}
         />
       )}
     </div>
@@ -526,14 +497,135 @@ const SubscriptionModal = ({ subscription, categories, onClose, onSubmit, isLoad
   );
 };
 
-// View/Print Modal
-const ViewSubscriptionModal = ({ subscription, onClose, onPrint, onDownload, printRef }) => {
+// View/Print Modal with direct window.print()
+const ViewSubscriptionModal = ({ subscription, onClose }) => {
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    // Create printable HTML
+    const printWindow = window.open('', '_blank');
+    const content = document.getElementById('printable-content').innerHTML;
+    
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Subscription - ${subscription.id}</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              padding: 40px;
+              max-width: 800px;
+              margin: 0 auto;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 3px solid #333;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+            .header h1 {
+              margin: 0;
+              font-size: 32px;
+              color: #333;
+            }
+            .id-box {
+              background: #f3f4f6;
+              padding: 20px;
+              border-radius: 8px;
+              text-align: center;
+              margin: 20px 0;
+            }
+            .id-box p {
+              margin: 5px 0;
+              font-size: 12px;
+              color: #666;
+            }
+            .id-box .id-value {
+              font-size: 18px;
+              font-weight: bold;
+              color: #2563eb;
+              word-break: break-all;
+              font-family: monospace;
+            }
+            .section {
+              margin: 30px 0;
+            }
+            .section h3 {
+              font-size: 18px;
+              border-bottom: 2px solid #e5e7eb;
+              padding-bottom: 10px;
+              margin-bottom: 15px;
+            }
+            .info-row {
+              display: flex;
+              margin: 10px 0;
+            }
+            .info-label {
+              font-weight: bold;
+              width: 150px;
+              color: #666;
+            }
+            .info-value {
+              color: #333;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 15px 0;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 12px;
+              text-align: left;
+            }
+            th {
+              background-color: #f9fafb;
+              font-weight: bold;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 40px;
+              padding-top: 20px;
+              border-top: 2px solid #e5e7eb;
+              color: #666;
+              font-size: 12px;
+            }
+            .status-active {
+              color: #059669;
+              font-weight: bold;
+            }
+            .status-inactive {
+              color: #dc2626;
+              font-weight: bold;
+            }
+            @media print {
+              body { padding: 20px; }
+            }
+          </style>
+        </head>
+        <body>
+          ${content}
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    
+    // Wait for content to load then trigger download as PDF
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          {/* Header - hide when printing */}
+          <div className="flex items-center justify-between mb-6 print:hidden">
             <h3 className="text-xl font-semibold text-gray-900">
               Subscription Details
             </h3>
@@ -542,130 +634,108 @@ const ViewSubscriptionModal = ({ subscription, onClose, onPrint, onDownload, pri
             </button>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center space-x-3 mb-6">
+          {/* Action Buttons - hide when printing */}
+          <div className="flex items-center space-x-3 mb-6 print:hidden">
             <button
-              onClick={onPrint}
+              onClick={handlePrint}
               className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               <Printer className="w-4 h-4" />
               <span>Print</span>
             </button>
             <button
-              onClick={onDownload}
+              onClick={handleDownload}
               className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
             >
               <Download className="w-4 h-4" />
-              <span>Download JSON</span>
+              <span>Download/Print PDF</span>
             </button>
           </div>
 
           {/* Printable Content */}
-          <div ref={printRef} className="p-8 bg-white">
+          <div id="printable-content">
             {/* Header */}
-            <div className="text-center mb-8 border-b-2 border-gray-300 pb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Parking Subscription</h1>
-              <p className="text-gray-600">Subscription Certificate</p>
+            <div className="header">
+              <h1>Parking Subscription</h1>
+              <p>Subscription Certificate</p>
             </div>
 
             {/* Subscription ID */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <div className="text-center">
-                <p className="text-sm text-gray-600 mb-1">Subscription ID</p>
-                <p className="text-2xl font-mono font-bold text-primary-600 break-all">
-                  {subscription.id}
-                </p>
+            <div className="id-box">
+              <p>Subscription ID</p>
+              <div className="id-value">{subscription.id}</div>
+            </div>
+
+            {/* Subscriber Info & Validity */}
+            <div className="section">
+              <h3>Subscriber Information</h3>
+              <div className="info-row">
+                <div className="info-label">Name:</div>
+                <div className="info-value">{subscription.userName}</div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Category:</div>
+                <div className="info-value">{subscription.category?.replace('cat_', '').toUpperCase()}</div>
+              </div>
+              <div className="info-row">
+                <div className="info-label">Status:</div>
+                <div className={subscription.active ? 'status-active' : 'status-inactive'}>
+                  {subscription.active ? 'ACTIVE' : 'INACTIVE'}
+                </div>
               </div>
             </div>
 
-            {/* Subscriber Info */}
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Subscriber Information</h3>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-gray-600">Name</p>
-                    <p className="text-base font-medium text-gray-900">{subscription.userName}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Category</p>
-                    <p className="text-base font-medium text-gray-900 capitalize">
-                      {subscription.category?.replace('cat_', '')}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Status</p>
-                    <p className={`text-base font-medium ${subscription.active ? 'text-green-600' : 'text-red-600'}`}>
-                      {subscription.active ? 'Active' : 'Inactive'}
-                    </p>
-                  </div>
+            <div className="section">
+              <h3>Validity Period</h3>
+              <div className="info-row">
+                <div className="info-label">Start Date:</div>
+                <div className="info-value">
+                  {new Date(subscription.startsAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
                 </div>
               </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Validity Period</h3>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-gray-600">Start Date</p>
-                    <p className="text-base font-medium text-gray-900">
-                      {new Date(subscription.startsAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">End Date</p>
-                    <p className="text-base font-medium text-gray-900">
-                      {new Date(subscription.expiresAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                  </div>
+              <div className="info-row">
+                <div className="info-label">End Date:</div>
+                <div className="info-value">
+                  {new Date(subscription.expiresAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
                 </div>
               </div>
             </div>
 
             {/* Registered Vehicles */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Registered Vehicles</h3>
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Plate Number
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Brand
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Model
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Color
-                      </th>
+            <div className="section">
+              <h3>Registered Vehicles</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Plate Number</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Color</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subscription.cars?.map((car, idx) => (
+                    <tr key={idx}>
+                      <td><strong>{car.plate}</strong></td>
+                      <td>{car.brand}</td>
+                      <td>{car.model}</td>
+                      <td>{car.color}</td>
                     </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {subscription.cars?.map((car, idx) => (
-                      <tr key={idx}>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{car.plate}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{car.brand}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{car.model}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600 capitalize">{car.color}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
             {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-gray-300 text-center text-sm text-gray-500">
+            <div className="footer">
               <p>Generated on {new Date().toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -673,12 +743,12 @@ const ViewSubscriptionModal = ({ subscription, onClose, onPrint, onDownload, pri
                 hour: '2-digit',
                 minute: '2-digit'
               })}</p>
-              <p className="mt-2">Parking Management System</p>
+              <p>Parking Management System</p>
             </div>
           </div>
 
-          {/* Close Button */}
-          <div className="mt-6 flex justify-end">
+          {/* Close Button - hide when printing */}
+          <div className="mt-6 flex justify-end print:hidden">
             <button
               onClick={onClose}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
@@ -688,6 +758,15 @@ const ViewSubscriptionModal = ({ subscription, onClose, onPrint, onDownload, pri
           </div>
         </div>
       </div>
+
+      {/* Add print styles */}
+      <style jsx>{`
+        @media print {
+          .print\\:hidden {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
