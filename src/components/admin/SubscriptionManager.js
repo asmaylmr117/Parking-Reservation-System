@@ -1,23 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { Plus, Users, Calendar, Car, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react';
+import { Plus, Users, Calendar, Car, CheckCircle, XCircle, Edit, Trash2, Download, Printer, X } from 'lucide-react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { useReactToPrint } from 'react-to-print';
 
 const SubscriptionManager = () => {
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState(null);
+  const [viewingSubscription, setViewingSubscription] = useState(null);
   const queryClient = useQueryClient();
+  const printRef = useRef();
 
   // Fetch subscriptions
   const { data: subscriptions, isLoading } = useQuery('subscriptions', 
     () => api.get('/admin/subscriptions').then(res => res.data),
     {
-      refetchInterval: 30000, // Refresh every 30 seconds
+      refetchInterval: 30000,
     }
   );
 
-  // Fetch categories for dropdown
+  // Fetch categories
   const { data: categories } = useQuery('categories', 
     () => api.get('/master/categories').then(res => res.data)
   );
@@ -29,13 +32,61 @@ const SubscriptionManager = () => {
       onSuccess: () => {
         queryClient.invalidateQueries('subscriptions');
         toast.success('Subscription added successfully!');
-        setShowAddModal(false);
+        setShowModal(false);
+        setEditingSubscription(null);
       },
       onError: (error) => {
         toast.error(error.response?.data?.message || 'Failed to add subscription');
       },
     }
   );
+
+  // Update subscription mutation
+  const updateSubscriptionMutation = useMutation(
+    ({ id, data }) => api.put(`/admin/subscriptions/${id}`, data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('subscriptions');
+        toast.success('Subscription updated successfully!');
+        setShowModal(false);
+        setEditingSubscription(null);
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to update subscription');
+      },
+    }
+  );
+
+  const handleEdit = (subscription) => {
+    setEditingSubscription(subscription);
+    setShowModal(true);
+  };
+
+  const handleAdd = () => {
+    setEditingSubscription(null);
+    setShowModal(true);
+  };
+
+  const handleView = (subscription) => {
+    setViewingSubscription(subscription);
+  };
+
+  // Print function
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: `Subscription-${viewingSubscription?.id}`,
+  });
+
+  // Download as JSON
+  const handleDownload = (subscription) => {
+    const dataStr = JSON.stringify(subscription, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileDefaultName = `subscription-${subscription.id}.json`;
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
 
   if (isLoading) {
     return (
@@ -54,7 +105,7 @@ const SubscriptionManager = () => {
           <p className="text-gray-600 mt-1">Manage parking subscriptions</p>
         </div>
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={handleAdd}
           className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
         >
           <Plus className="w-5 h-5" />
@@ -194,10 +245,25 @@ const SubscriptionManager = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => setEditingSubscription(subscription)}
+                        onClick={() => handleEdit(subscription)}
                         className="text-blue-600 hover:text-blue-900"
+                        title="Edit"
                       >
                         <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleView(subscription)}
+                        className="text-green-600 hover:text-green-900"
+                        title="View & Print"
+                      >
+                        <Printer className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDownload(subscription)}
+                        className="text-purple-600 hover:text-purple-900"
+                        title="Download"
+                      >
+                        <Download className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -208,28 +274,49 @@ const SubscriptionManager = () => {
         </div>
       </div>
 
-      {/* Add Subscription Modal */}
-      {showAddModal && (
-        <AddSubscriptionModal
+      {/* Add/Edit Modal */}
+      {showModal && (
+        <SubscriptionModal
+          subscription={editingSubscription}
           categories={categories}
-          onClose={() => setShowAddModal(false)}
-          onSubmit={(data) => addSubscriptionMutation.mutate(data)}
-          isLoading={addSubscriptionMutation.isLoading}
+          onClose={() => {
+            setShowModal(false);
+            setEditingSubscription(null);
+          }}
+          onSubmit={(data) => {
+            if (editingSubscription) {
+              updateSubscriptionMutation.mutate({ id: editingSubscription.id, data });
+            } else {
+              addSubscriptionMutation.mutate(data);
+            }
+          }}
+          isLoading={addSubscriptionMutation.isLoading || updateSubscriptionMutation.isLoading}
+        />
+      )}
+
+      {/* View/Print Modal */}
+      {viewingSubscription && (
+        <ViewSubscriptionModal
+          subscription={viewingSubscription}
+          onClose={() => setViewingSubscription(null)}
+          onPrint={handlePrint}
+          onDownload={() => handleDownload(viewingSubscription)}
+          printRef={printRef}
         />
       )}
     </div>
   );
 };
 
-// Add Subscription Modal Component
-const AddSubscriptionModal = ({ categories, onClose, onSubmit, isLoading }) => {
+// Add/Edit Subscription Modal
+const SubscriptionModal = ({ subscription, categories, onClose, onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({
-    userName: '',
-    category: '',
-    cars: [{ plate: '', brand: '', model: '', color: '' }],
-    startsAt: new Date().toISOString().split('T')[0],
-    expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    active: true,
+    userName: subscription?.userName || '',
+    category: subscription?.category || '',
+    cars: subscription?.cars || [{ plate: '', brand: '', model: '', color: '' }],
+    startsAt: subscription?.startsAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+    expiresAt: subscription?.expiresAt?.split('T')[0] || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    active: subscription?.active !== undefined ? subscription.active : true,
   });
 
   const handleAddCar = () => {
@@ -261,7 +348,14 @@ const AddSubscriptionModal = ({ categories, onClose, onSubmit, isLoading }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Add New Subscription</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold text-gray-900">
+              {subscription ? 'Edit Subscription' : 'Add New Subscription'}
+            </h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* User Name */}
@@ -296,6 +390,20 @@ const AddSubscriptionModal = ({ categories, onClose, onSubmit, isLoading }) => {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Active Status */}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="active"
+                checked={formData.active}
+                onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+                className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              />
+              <label htmlFor="active" className="text-sm font-medium text-gray-700">
+                Active Subscription
+              </label>
             </div>
 
             {/* Date Range */}
@@ -394,7 +502,7 @@ const AddSubscriptionModal = ({ categories, onClose, onSubmit, isLoading }) => {
             </div>
 
             {/* Buttons */}
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex justify-end space-x-3 pt-4 border-t">
               <button
                 type="button"
                 onClick={onClose}
@@ -408,10 +516,176 @@ const AddSubscriptionModal = ({ categories, onClose, onSubmit, isLoading }) => {
                 className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
                 disabled={isLoading}
               >
-                {isLoading ? 'Adding...' : 'Add Subscription'}
+                {isLoading ? 'Saving...' : subscription ? 'Update Subscription' : 'Add Subscription'}
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// View/Print Modal
+const ViewSubscriptionModal = ({ subscription, onClose, onPrint, onDownload, printRef }) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-gray-900">
+              Subscription Details
+            </h3>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-3 mb-6">
+            <button
+              onClick={onPrint}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              <Printer className="w-4 h-4" />
+              <span>Print</span>
+            </button>
+            <button
+              onClick={onDownload}
+              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              <Download className="w-4 h-4" />
+              <span>Download JSON</span>
+            </button>
+          </div>
+
+          {/* Printable Content */}
+          <div ref={printRef} className="p-8 bg-white">
+            {/* Header */}
+            <div className="text-center mb-8 border-b-2 border-gray-300 pb-6">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Parking Subscription</h1>
+              <p className="text-gray-600">Subscription Certificate</p>
+            </div>
+
+            {/* Subscription ID */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-1">Subscription ID</p>
+                <p className="text-2xl font-mono font-bold text-primary-600 break-all">
+                  {subscription.id}
+                </p>
+              </div>
+            </div>
+
+            {/* Subscriber Info */}
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Subscriber Information</h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-gray-600">Name</p>
+                    <p className="text-base font-medium text-gray-900">{subscription.userName}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Category</p>
+                    <p className="text-base font-medium text-gray-900 capitalize">
+                      {subscription.category?.replace('cat_', '')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Status</p>
+                    <p className={`text-base font-medium ${subscription.active ? 'text-green-600' : 'text-red-600'}`}>
+                      {subscription.active ? 'Active' : 'Inactive'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Validity Period</h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-gray-600">Start Date</p>
+                    <p className="text-base font-medium text-gray-900">
+                      {new Date(subscription.startsAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">End Date</p>
+                    <p className="text-base font-medium text-gray-900">
+                      {new Date(subscription.expiresAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Registered Vehicles */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Registered Vehicles</h3>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Plate Number
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Brand
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Model
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                        Color
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {subscription.cars?.map((car, idx) => (
+                      <tr key={idx}>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{car.plate}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{car.brand}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{car.model}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600 capitalize">{car.color}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-8 pt-6 border-t border-gray-300 text-center text-sm text-gray-500">
+              <p>Generated on {new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}</p>
+              <p className="mt-2">Parking Management System</p>
+            </div>
+          </div>
+
+          {/* Close Button */}
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
