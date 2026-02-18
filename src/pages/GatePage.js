@@ -7,7 +7,7 @@ import GateHeader from '../components/GateHeader';
 import ZoneCard from '../components/ZoneCard';
 import TicketModal from '../components/TicketModal';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { Users, User, ArrowRight } from 'lucide-react';
+import { Users, User, ArrowRight, X } from 'lucide-react';
 import toast from 'react-hot-toast';
  
 const GatePage = () => {
@@ -220,7 +220,7 @@ const GatePage = () => {
   const zonesByCategory = getZonesByCategory();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-32 md:pb-6">
       {/* Gate Header */}
       <GateHeader gate={currentGate} />
 
@@ -282,7 +282,7 @@ const GatePage = () => {
                     type="text"
                     value={subscriptionId}
                     onChange={(e) => setSubscriptionId(e.target.value)}
-                    placeholder="Enter subscription ID (e.g., sub_001)"
+                    placeholder="Enter subscription ID (e.g., SUB-V2-...)"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
@@ -320,6 +320,36 @@ const GatePage = () => {
           )}
         </div>
 
+        {/* Selected Zone Info - Mobile: Top, Desktop: Bottom Left */}
+        {selectedZone && (
+          <div className="md:hidden mb-4 bg-white rounded-lg shadow-lg border border-gray-200 p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-semibold text-gray-900">Selected Zone</h4>
+              <button
+                onClick={() => setSelectedZone(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="text-sm space-y-1">
+              <div><strong>Zone:</strong> {selectedZone.name}</div>
+              <div><strong>Rate:</strong> ${selectedZone.rateNormal}/hour (normal), ${selectedZone.rateSpecial}/hour (special)</div>
+              <div><strong>Available:</strong> 
+                {selectedTab === 'visitor' 
+                  ? ` ${selectedZone.availableForVisitors} slots` 
+                  : ` ${selectedZone.availableForSubscribers} slots`
+                }
+              </div>
+              {selectedTab === 'subscriber' && verifiedSubscription && (
+                <div className="text-green-600">
+                  <strong>✓</strong> Subscription verified for this category
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Zone Selection */}
         <div className="space-y-6">
           {Object.entries(zonesByCategory).map(([categoryId, categoryZones]) => (
@@ -351,16 +381,18 @@ const GatePage = () => {
             <button
               onClick={handleCheckin}
               disabled={!canProceedWithCheckin() || checkinMutation.isLoading}
-              className="bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-4 rounded-full font-semibold flex items-center space-x-2 shadow-lg transition-all duration-200 transform hover:scale-105"
+              className="bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 md:px-8 md:py-4 rounded-full font-semibold flex items-center space-x-2 shadow-lg transition-all duration-200 transform hover:scale-105"
             >
               {checkinMutation.isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>Processing...</span>
+                  <span className="hidden sm:inline">Processing...</span>
+                  <span className="sm:hidden">Wait...</span>
                 </>
               ) : (
                 <>
-                  <span>Check In to {selectedZone.name}</span>
+                  <span className="hidden sm:inline">Check In to {selectedZone.name}</span>
+                  <span className="sm:hidden">Check In</span>
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}
@@ -368,9 +400,9 @@ const GatePage = () => {
           </div>
         )}
 
-        {/* Selected Zone Info */}
+        {/* Selected Zone Info - Desktop Only */}
         {selectedZone && (
-          <div className="fixed bottom-6 left-6 bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm z-40">
+          <div className="hidden md:block fixed bottom-6 left-6 bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm z-40">
             <h4 className="font-semibold text-gray-900 mb-2">Selected Zone</h4>
             <div className="text-sm space-y-1">
               <div><strong>Zone:</strong> {selectedZone.name}</div>

@@ -157,7 +157,7 @@ export const useSubscription = (subscriptionId) => {
   );
 };
 
-// Ticket hooks (تم تضمين useTicket المفقود هنا)
+// Ticket hooks 
 export const useCheckin = () => {
   const queryClient = useQueryClient();
   return useMutation(ticketAPI.checkin, {
@@ -198,7 +198,7 @@ export const useTicket = (ticketId) => {
   );
 };
 
-// Admin hooks (متوافقة تماماً مع صفحة إدارة الموظفين)
+// Admin hooks 
 export const useParkingState = () => {
   return useQuery(
     'parkingState',
@@ -288,24 +288,216 @@ export const useUpdateCategory = () => {
   );
 };
 
+// ============= ZONES MANAGEMENT =============
+
+export const useCreateZone = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (data) => api.post('/admin/zones', data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('zones');
+        queryClient.invalidateQueries('parkingState');
+        toast.success('Zone created successfully!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to create zone');
+      },
+    }
+  );
+};
+
+export const useUpdateZone = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ zoneId, data }) => api.put(`/admin/zones/${zoneId}`, data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('zones');
+        queryClient.invalidateQueries('parkingState');
+        toast.success('Zone updated successfully!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to update zone');
+      },
+    }
+  );
+};
+
+export const useDeleteZone = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (zoneId) => api.delete(`/admin/zones/${zoneId}`),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('zones');
+        queryClient.invalidateQueries('parkingState');
+        toast.success('Zone deleted successfully!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to delete zone');
+      },
+    }
+  );
+};
+
+export const useBulkToggleZones = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ zoneIds, open }) => api.post('/admin/zones/bulk/toggle', { zoneIds, open }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('zones');
+        queryClient.invalidateQueries('parkingState');
+        toast.success('Zones updated successfully!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to update zones');
+      },
+    }
+  );
+};
+
+// ============= RUSH HOURS MANAGEMENT =============
+export const useRushHours = () => {
+  return useQuery('rushHours', () => 
+    api.get('/admin/rush-hours').then(res => res.data)
+  );
+};
+
 export const useCreateRushHour = () => {
   const queryClient = useQueryClient();
-  return useMutation(adminAPI.createRushHour, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('rushHours');
-      toast.success('Rush hour added successfully!');
-    },
-  });
+  return useMutation(
+    (data) => api.post('/admin/rush-hours', data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('rushHours');
+        toast.success('Rush hour created successfully!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to create rush hour');
+      },
+    }
+  );
+};
+
+export const useUpdateRushHour = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ rushHourId, data }) => api.put(`/admin/rush-hours/${rushHourId}`, data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('rushHours');
+        toast.success('Rush hour updated successfully!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to update rush hour');
+      },
+    }
+  );
+};
+
+export const useDeleteRushHour = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (rushHourId) => api.delete(`/admin/rush-hours/${rushHourId}`),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('rushHours');
+        toast.success('Rush hour deleted successfully!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to delete rush hour');
+      },
+    }
+  );
+};
+
+export const useToggleRushHour = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (rushHourId) => api.put(`/admin/rush-hours/${rushHourId}/toggle`),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('rushHours');
+        toast.success('Rush hour status updated!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to toggle rush hour');
+      },
+    }
+  );
+};
+
+// ============= VACATIONS MANAGEMENT =============
+export const useVacations = () => {
+  return useQuery('vacations', () => 
+    api.get('/admin/vacations').then(res => res.data)
+  );
 };
 
 export const useCreateVacation = () => {
   const queryClient = useQueryClient();
-  return useMutation(adminAPI.createVacation, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('vacations');
-      toast.success('Vacation period added successfully!');
-    },
-  });
+  return useMutation(
+    (data) => api.post('/admin/vacations', data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('vacations');
+        toast.success('Vacation created successfully!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to create vacation');
+      },
+    }
+  );
+};
+
+export const useUpdateVacation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ vacationId, data }) => api.put(`/admin/vacations/${vacationId}`, data),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('vacations');
+        toast.success('Vacation updated successfully!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to update vacation');
+      },
+    }
+  );
+};
+
+export const useDeleteVacation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (vacationId) => api.delete(`/admin/vacations/${vacationId}`),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('vacations');
+        toast.success('Vacation deleted successfully!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to delete vacation');
+      },
+    }
+  );
+};
+
+export const useToggleVacation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (vacationId) => api.put(`/admin/vacations/${vacationId}/toggle`),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries('vacations');
+        toast.success('Vacation status updated!');
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to toggle vacation');
+      },
+    }
+  );
 };
 
 export default api;

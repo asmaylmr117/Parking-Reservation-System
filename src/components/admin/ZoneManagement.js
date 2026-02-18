@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { MapPin, CheckCircle, XCircle } from 'lucide-react';
+import { MapPin, CheckCircle, XCircle, Edit, Trash2, Plus, X } from 'lucide-react';
 
-const ZoneManagement = ({ zones = [], onToggleZone, isLoading = false }) => {
+const ZoneManagement = ({ zones = [], onToggleZone, onBulkToggle, isLoading = false }) => {
   const [selectedZones, setSelectedZones] = useState([]);
+  const [editingZone, setEditingZone] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({});
 
   const handleSelectAll = (checked) => {
     if (checked) {
@@ -19,20 +22,34 @@ const ZoneManagement = ({ zones = [], onToggleZone, isLoading = false }) => {
       setSelectedZones(selectedZones.filter(id => id !== zoneId));
     }
   };
+  
   const handleBulkAction = async (action) => {
     if (selectedZones.length === 0) return;
     
     try {
-      for (const zoneId of selectedZones) {
-        const zone = zones.find(z => z.id === zoneId);
-        if (zone) {
-          await onToggleZone(zoneId, action === 'close' ? true : false);
-        }
-      }
+      await onBulkToggle(selectedZones, action === 'open');
       setSelectedZones([]);
     } catch (error) {
       console.error('Bulk action failed:', error);
     }
+  };
+
+  const handleEdit = (zone) => {
+    setEditingZone(zone);
+    setEditForm({
+      name: zone.name,
+      totalSlots: zone.totalSlots,
+      open: zone.open
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async () => {
+    // This would call an API to update the zone
+    // For now, just close the modal
+    console.log('Saving zone:', editingZone.id, editForm);
+    setShowEditModal(false);
+    setEditingZone(null);
   };
 
   const getOccupancyColor = (occupancyRate) => {
@@ -50,7 +67,7 @@ const ZoneManagement = ({ zones = [], onToggleZone, isLoading = false }) => {
             <label className="flex items-center">
               <input
                 type="checkbox"
-                checked={selectedZones.length === zones.length}
+                checked={selectedZones.length === zones.length && zones.length > 0}
                 onChange={(e) => handleSelectAll(e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
@@ -98,7 +115,9 @@ const ZoneManagement = ({ zones = [], onToggleZone, isLoading = false }) => {
         <div className="p-6">
           <div className="grid gap-4">
             {zones.map((zone) => {
-              const occupancyRate = ((zone.occupied / zone.totalSlots) * 100).toFixed(1);
+              const occupancyRate = zone.totalSlots > 0 
+                ? ((zone.occupied / zone.totalSlots) * 100).toFixed(1) 
+                : 0;
               
               return (
                 <div key={zone.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
@@ -133,6 +152,14 @@ const ZoneManagement = ({ zones = [], onToggleZone, isLoading = false }) => {
                     </span>
                     
                     <button
+                      onClick={() => handleEdit(zone)}
+                      className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                      title="Edit Zone"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    
+                    <button
                       onClick={() => onToggleZone(zone.id, zone.open)}
                       disabled={isLoading}
                       className="flex items-center space-x-2 text-primary-600 hover:text-primary-700 disabled:opacity-50 transition-colors"
@@ -164,6 +191,78 @@ const ZoneManagement = ({ zones = [], onToggleZone, isLoading = false }) => {
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && editingZone && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Edit Zone</h3>
+              <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Zone Name
+                </label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Total Slots
+                </label>
+                <input
+                  type="number"
+                  min={editingZone.occupied}
+                  value={editForm.totalSlots}
+                  onChange={(e) => setEditForm({ ...editForm, totalSlots: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Current occupancy: {editingZone.occupied} slots
+                </p>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="open"
+                  checked={editForm.open}
+                  onChange={(e) => setEditForm({ ...editForm, open: e.target.checked })}
+                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                />
+                <label htmlFor="open" className="ml-2 text-sm text-gray-700">
+                  Zone is open
+                </label>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveEdit}
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
