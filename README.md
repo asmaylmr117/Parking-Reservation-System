@@ -1,4 +1,4 @@
-# WeLink Cargo Parking Reservation System - Frontend
+#  Parking Reservation System - Frontend
 
 A comprehensive React.js frontend application for the WeLink Cargo Parking Reservation System, featuring real-time updates, modern UI, and complete parking management functionality.
 
@@ -55,22 +55,6 @@ Ensure the backend server is running on `http://localhost:3000`. The frontend ex
 - **API Base URL**: `http://localhost:3000/api/v1`
 - **WebSocket URL**: `ws://localhost:3000/api/v1/ws`
 
-##  Demo Users
-The application includes pre-configured demo users for testing:
-
-### Administrators
-- Username: `admin` | Password: `adminpass`
-- Username: `superadmin` | Password: `superpass`
-
-### Employees
-- Username: `emp1` | Password: `pass1`
-- Username: `emp2` | Password: `pass1`
-- Username: `checkpoint1` | Password: `checkpoint1`
-
-### Test Subscriptions
-- `sub_001` - Active Premium subscriber (Ali)
-- `sub_002` - Active Regular subscriber (Sara)
-- `sub_003` - Active VIP subscriber (Ahmed)
 
 ##  Application Screens
 
@@ -289,5 +273,5 @@ await checkinMutation.mutateAsync(checkinData);
 
 ---
 
-**WeLink Cargo Parking Reservation System**  
+** Parking Reservation System**  
 Built with ❤️ using React.js, React Query, Zustand, and Tailwind CSS

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 // Import admin sub-components
-import ParkingStateReport from '../components/admin/ParkingStateReport';
+
 import EmployeeManager from '../components/admin/EmployeeManager';
 import ControlPanel from '../components/admin/ControlPanel';
 import SubscriptionManager from '../components/admin/SubscriptionManager';
@@ -20,12 +20,7 @@ const AdminDashboard = () => {
   const location = useLocation();
   
   const navigation = [
-    {
-      name: 'Parking Report',
-      href: '/admin',
-      icon: BarChart3,
-      description: 'Real-time parking state overview'
-    },
+    
     {
       name: 'Employees',
       href: '/admin/employees',
@@ -153,7 +148,7 @@ const AdminDashboard = () => {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Routes>
-              <Route index element={<ParkingStateReport />} />
+             
               <Route path="employees" element={<EmployeeManager />} />
               <Route path="subscriptions" element={<SubscriptionManager />} />
               <Route path="control" element={<ControlPanel />} />
