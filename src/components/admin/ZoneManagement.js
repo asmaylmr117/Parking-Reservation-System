@@ -45,8 +45,6 @@ const ZoneManagement = ({ zones = [], onToggleZone, onBulkToggle, isLoading = fa
   };
 
   const handleSaveEdit = async () => {
-    // This would call an API to update the zone
-    // For now, just close the modal
     console.log('Saving zone:', editingZone.id, editForm);
     setShowEditModal(false);
     setEditingZone(null);
@@ -59,11 +57,11 @@ const ZoneManagement = ({ zones = [], onToggleZone, onBulkToggle, isLoading = fa
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Bulk Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
             <label className="flex items-center">
               <input
                 type="checkbox"
@@ -71,34 +69,36 @@ const ZoneManagement = ({ zones = [], onToggleZone, onBulkToggle, isLoading = fa
                 onChange={(e) => handleSelectAll(e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="ml-2 text-sm text-gray-700">Select all zones</span>
+              <span className="ml-2 text-xs sm:text-sm text-gray-700">Select all</span>
             </label>
             
             {selectedZones.length > 0 && (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">
-                  {selectedZones.length} zones selected
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs sm:text-sm text-gray-600">
+                  {selectedZones.length} selected
                 </span>
-                <button
-                  onClick={() => handleBulkAction('open')}
-                  disabled={isLoading}
-                  className="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded transition-colors"
-                >
-                  Open Selected
-                </button>
-                <button
-                  onClick={() => handleBulkAction('close')}
-                  disabled={isLoading}
-                  className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded transition-colors"
-                >
-                  Close Selected
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => handleBulkAction('open')}
+                    disabled={isLoading}
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded transition-colors whitespace-nowrap"
+                  >
+                    Open
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction('close')}
+                    disabled={isLoading}
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded transition-colors whitespace-nowrap"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             )}
           </div>
           
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">
+          <div className="flex items-center justify-end">
+            <span className="text-xs sm:text-sm text-gray-500">
               {zones.filter(z => z.open).length} of {zones.length} zones open
             </span>
           </div>
@@ -107,45 +107,47 @@ const ZoneManagement = ({ zones = [], onToggleZone, onBulkToggle, isLoading = fa
 
       {/* Zones List */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Zone Status Control</h3>
-          <p className="text-sm text-gray-600 mt-1">Open or close zones for maintenance or management</p>
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Zone Status Control</h3>
+          <p className="text-xs sm:text-sm text-gray-600 mt-1">Open or close zones for maintenance or management</p>
         </div>
 
-        <div className="p-6">
-          <div className="grid gap-4">
+        <div className="p-4 sm:p-6">
+          <div className="grid gap-3 sm:gap-4">
             {zones.map((zone) => {
               const occupancyRate = zone.totalSlots > 0 
                 ? ((zone.occupied / zone.totalSlots) * 100).toFixed(1) 
                 : 0;
               
               return (
-                <div key={zone.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center space-x-4">
+                <div key={zone.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors space-y-3 sm:space-y-0">
+                  <div className="flex items-start space-x-3">
                     <input
                       type="checkbox"
                       checked={selectedZones.includes(zone.id)}
                       onChange={(e) => handleSelectZone(zone.id, e.target.checked)}
-                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      className="mt-1 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                     />
                     
-                    <div className={`w-3 h-3 rounded-full ${zone.open ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${zone.open ? 'bg-green-500' : 'bg-red-500'} mt-1.5 flex-shrink-0`}></div>
                     
-                    <MapPin className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <h4 className="font-medium text-gray-900">{zone.name}</h4>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0 mt-1" />
+                    
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm sm:text-base font-medium text-gray-900 truncate">{zone.name}</h4>
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 mt-1">
                         <span>{zone.occupied}/{zone.totalSlots} occupied</span>
-                        <span>Category: {zone.categoryId?.replace('cat_', '') || 'Unknown'}</span>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getOccupancyColor(occupancyRate)}`}>
-                          {occupancyRate}% full
+                        <span className="hidden sm:inline">•</span>
+                        <span className="capitalize">Cat: {zone.categoryId?.replace('cat_', '') || 'Unknown'}</span>
+                        <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium ${getOccupancyColor(occupancyRate)}`}>
+                          {occupancyRate}%
                         </span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-4">
-                    <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                  <div className="flex items-center justify-end space-x-2 sm:space-x-4 ml-7 sm:ml-0">
+                    <span className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
                       zone.open ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }`}>
                       {zone.open ? 'Open' : 'Closed'}
@@ -153,26 +155,26 @@ const ZoneManagement = ({ zones = [], onToggleZone, onBulkToggle, isLoading = fa
                     
                     <button
                       onClick={() => handleEdit(zone)}
-                      className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                      className="p-1.5 sm:p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
                       title="Edit Zone"
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                     
                     <button
                       onClick={() => onToggleZone(zone.id, zone.open)}
                       disabled={isLoading}
-                      className="flex items-center space-x-2 text-primary-600 hover:text-primary-700 disabled:opacity-50 transition-colors"
+                      className="flex items-center space-x-1 sm:space-x-2 text-primary-600 hover:text-primary-700 disabled:opacity-50 transition-colors"
                     >
                       {zone.open ? (
                         <>
-                          <XCircle className="w-5 h-5" />
-                          <span className="text-sm font-medium">Close</span>
+                          <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span className="text-xs sm:text-sm font-medium hidden xs:inline">Close</span>
                         </>
                       ) : (
                         <>
-                          <CheckCircle className="w-5 h-5" />
-                          <span className="text-sm font-medium">Open</span>
+                          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span className="text-xs sm:text-sm font-medium hidden xs:inline">Open</span>
                         </>
                       )}
                     </button>
@@ -183,41 +185,41 @@ const ZoneManagement = ({ zones = [], onToggleZone, onBulkToggle, isLoading = fa
           </div>
 
           {zones.length === 0 && (
-            <div className="text-center py-8">
-              <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900">No zones found</h3>
-              <p className="text-gray-600 mt-2">No parking zones are configured in the system.</p>
+            <div className="text-center py-6 sm:py-8">
+              <MapPin className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400 mx-auto mb-3 sm:mb-4" />
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">No zones found</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1 sm:mt-2">No parking zones are configured in the system.</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Edit Modal */}
+      {/* Edit Modal - Responsive */}
       {showEditModal && editingZone && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Edit Zone</h3>
-              <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Edit Zone</h3>
+              <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600 p-1">
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-4 sm:p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Zone Name
                 </label>
                 <input
                   type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Total Slots
                 </label>
                 <input
@@ -225,7 +227,7 @@ const ZoneManagement = ({ zones = [], onToggleZone, onBulkToggle, isLoading = fa
                   min={editingZone.occupied}
                   value={editForm.totalSlots}
                   onChange={(e) => setEditForm({ ...editForm, totalSlots: parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Current occupancy: {editingZone.occupied} slots
@@ -240,22 +242,22 @@ const ZoneManagement = ({ zones = [], onToggleZone, onBulkToggle, isLoading = fa
                   onChange={(e) => setEditForm({ ...editForm, open: e.target.checked })}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <label htmlFor="open" className="ml-2 text-sm text-gray-700">
+                <label htmlFor="open" className="ml-2 text-xs sm:text-sm text-gray-700">
                   Zone is open
                 </label>
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 w-full sm:w-auto"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveEdit}
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                className="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 w-full sm:w-auto"
               >
                 Save Changes
               </button>

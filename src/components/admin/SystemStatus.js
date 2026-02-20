@@ -46,16 +46,18 @@ const SystemStatus = ({ zones = [], rushHours = [], vacations = [] }) => {
   ];
  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       {statusCards.map((card, index) => {
         const Icon = card.icon;
         return (
-          <div key={index} className={`${card.bgColor} border ${card.borderColor} rounded-lg p-4`}>
+          <div key={index} className={`${card.bgColor} border ${card.borderColor} rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow`}>
             <div className="flex items-center">
-              <Icon className={`w-6 h-6 ${card.iconColor} mr-3`} />
-              <div>
-                <p className={`text-sm font-medium ${card.textColor}`}>{card.title}</p>
-                <p className={`text-xs ${card.subtitleColor}`}>{card.subtitle}</p>
+              <div className={`${card.iconColor} p-1.5 sm:p-2 rounded-full bg-white bg-opacity-50 mr-2 sm:mr-3`}>
+                <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${card.iconColor}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`text-xs sm:text-sm font-medium ${card.textColor} truncate`}>{card.title}</p>
+                <p className={`text-xs sm:text-sm ${card.subtitleColor} truncate`}>{card.subtitle}</p>
               </div>
             </div>
           </div>
