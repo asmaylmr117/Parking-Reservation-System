@@ -143,22 +143,22 @@ const ControlPanel = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Control Panel</h2>
-          <p className="text-gray-600 mt-1">Manage zones, rates, and schedules</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Control Panel</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Manage zones, rates, and schedules</p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
           <button
             onClick={handleRefreshAll}
-            className="flex items-center space-x-2 px-3 py-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors"
+            className="flex items-center justify-center space-x-2 px-3 py-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors w-full sm:w-auto text-sm sm:text-base"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Refresh</span>
           </button>
-          <div className="text-sm text-gray-500">
+          <div className="text-xs sm:text-sm text-gray-500">
             Last updated: {new Date().toLocaleTimeString()}
           </div>
         </div>
@@ -167,9 +167,9 @@ const ControlPanel = () => {
       {/* System Status Cards */}
       <SystemStatus zones={zones} rushHours={rushHours || []} vacations={vacations || []} />
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+      {/* Tabs - Responsive */}
+      <div className="border-b border-gray-200 overflow-x-auto pb-px">
+        <nav className="flex space-x-4 sm:space-x-8 min-w-max sm:min-w-0">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -178,16 +178,16 @@ const ControlPanel = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors ${
+                className={`py-2 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center space-x-1 sm:space-x-2 transition-colors whitespace-nowrap ${
                   isActive
                     ? 'border-primary-500 text-primary-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>{tab.name}</span>
                 {tab.count > 0 && (
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  <span className={`inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-xs font-medium ${
                     isActive ? 'bg-primary-100 text-primary-800' : 'bg-gray-100 text-gray-800'
                   }`}>
                     {tab.count}
@@ -200,77 +200,82 @@ const ControlPanel = () => {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'zones' && (
-        <ZoneManagement 
-          zones={zones}
-          onToggleZone={handleZoneToggle}
-          onBulkToggle={handleBulkToggleZones}
-          isLoading={toggleZoneMutation.isLoading || bulkToggleZonesMutation.isLoading}
-        />
-      )}
+      <div className="mt-4 sm:mt-6">
+        {activeTab === 'zones' && (
+          <ZoneManagement 
+            zones={zones}
+            onToggleZone={handleZoneToggle}
+            onBulkToggle={handleBulkToggleZones}
+            isLoading={toggleZoneMutation.isLoading || bulkToggleZonesMutation.isLoading}
+          />
+        )}
 
-      {activeTab === 'rates' && (
-        <RateManagement
-          categories={categories}
-          onUpdateCategory={handleUpdateCategory}
-          isLoading={updateCategoryMutation.isLoading}
-        />
-      )}
+        {activeTab === 'rates' && (
+          <RateManagement
+            categories={categories}
+            onUpdateCategory={handleUpdateCategory}
+            isLoading={updateCategoryMutation.isLoading}
+          />
+        )}
 
-      {activeTab === 'rush' && (
-        <RushHourManagement
-          rushHours={rushHours || []}
-          onCreateRushHour={handleCreateRushHour}
-          onUpdateRushHour={handleUpdateRushHour}
-          onDeleteRushHour={handleDeleteRushHour}
-          onToggleRushHour={handleToggleRushHour}
-          isLoading={createRushHourMutation.isLoading || updateRushHourMutation.isLoading}
-        />
-      )}
+        {activeTab === 'rush' && (
+          <RushHourManagement
+            rushHours={rushHours || []}
+            onCreateRushHour={handleCreateRushHour}
+            onUpdateRushHour={handleUpdateRushHour}
+            onDeleteRushHour={handleDeleteRushHour}
+            onToggleRushHour={handleToggleRushHour}
+            isLoading={createRushHourMutation.isLoading || updateRushHourMutation.isLoading}
+          />
+        )}
 
-      {activeTab === 'vacations' && (
-        <VacationManagement
-          vacations={vacations || []}
-          onCreateVacation={handleCreateVacation}
-          onUpdateVacation={handleUpdateVacation}
-          onDeleteVacation={handleDeleteVacation}
-          onToggleVacation={handleToggleVacation}
-          isLoading={createVacationMutation.isLoading || updateVacationMutation.isLoading}
-        />
-      )}
+        {activeTab === 'vacations' && (
+          <VacationManagement
+            vacations={vacations || []}
+            onCreateVacation={handleCreateVacation}
+            onUpdateVacation={handleUpdateVacation}
+            onDeleteVacation={handleDeleteVacation}
+            onToggleVacation={handleToggleVacation}
+            isLoading={createVacationMutation.isLoading || updateVacationMutation.isLoading}
+          />
+        )}
+      </div>
 
       {/* Quick Actions Card */}
-      <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-6 text-white">
-        <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-        <div className="grid md:grid-cols-3 gap-4">
+      <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-4 sm:p-6 text-white mt-6">
+        <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           <button 
             onClick={handleEmergencyCloseAll}
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-left transition-colors"
+            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-3 sm:p-4 text-left transition-colors"
           >
-            <AlertTriangle className="w-6 h-6 mb-2" />
-            <div className="text-sm font-medium">Emergency Close All</div>
-            <div className="text-xs opacity-75 mt-1">Close all zones immediately</div>
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2" />
+            <div className="text-xs sm:text-sm font-medium">Emergency Close All</div>
+            <div className="text-xs opacity-75 mt-0.5 sm:mt-1">Close all zones immediately</div>
           </button>
           
           <button 
             onClick={handleOpenAllZones}
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-left transition-colors"
+            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-3 sm:p-4 text-left transition-colors"
           >
-            <ToggleRight className="w-6 h-6 mb-2" />
-            <div className="text-sm font-medium">Open All Zones</div>
-            <div className="text-xs opacity-75 mt-1">Open all closed zones</div>
+            <ToggleRight className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2" />
+            <div className="text-xs sm:text-sm font-medium">Open All Zones</div>
+            <div className="text-xs opacity-75 mt-0.5 sm:mt-1">Open all closed zones</div>
           </button>
           
           <button 
             onClick={handleRefreshAll}
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-4 text-left transition-colors"
+            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-3 sm:p-4 text-left transition-colors sm:col-span-1 col-span-2 sm:col-span-1"
           >
-            <RefreshCw className="w-6 h-6 mb-2" />
-            <div className="text-sm font-medium">Refresh All Data</div>
-            <div className="text-xs opacity-75 mt-1">Reload all information</div>
+            <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2" />
+            <div className="text-xs sm:text-sm font-medium">Refresh All Data</div>
+            <div className="text-xs opacity-75 mt-0.5 sm:mt-1">Reload all information</div>
           </button>
         </div>
       </div>
+
+      {/* Mobile Bottom Padding */}
+      <div className="h-4 sm:h-0"></div>
     </div>
   );
 };
