@@ -58,18 +58,18 @@ const EmployeeStats = ({ users = [] }) => {
   ];
  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
       {statCards.map((stat, index) => {
         const Icon = stat.icon;
         return (
-          <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <div className="flex items-center">
-              <div className={`w-8 h-8 ${stat.bgColor} rounded-lg flex items-center justify-center mr-3`}>
+          <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left">
+              <div className={`w-8 h-8 sm:w-8 sm:h-8 ${stat.bgColor} rounded-lg flex items-center justify-center mb-2 sm:mb-0 sm:mr-3`}>
                 <Icon className={`w-4 h-4 ${stat.iconColor}`} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                <p className="text-xl font-bold text-gray-900">{stat.value}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-600">{stat.title}</p>
+                <p className="text-base sm:text-xl font-bold text-gray-900">{stat.value}</p>
               </div>
             </div>
           </div>
