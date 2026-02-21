@@ -53,7 +53,7 @@ const LoginPage = () => {
             Parking Reservation System
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            WeLink Cargo - Sign in to manage parking operations
+        Sign in to manage parking operations
           </p>
         </div>
 

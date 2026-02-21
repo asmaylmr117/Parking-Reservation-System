@@ -59,10 +59,10 @@ const ControlPanel = () => {
   const zones = parkingState?.zones || [];
 
   const tabs = [
-    { id: 'zones', name: 'Zone Management', icon: MapPin, count: zones.length },
-    { id: 'rates', name: 'Rate Management', icon: DollarSign, count: categories?.length || 0 },
-    { id: 'rush', name: 'Rush Hours', icon: Clock, count: rushHours?.filter(r => r.active).length || 0 },
-    { id: 'vacations', name: 'Vacations', icon: Calendar, count: vacations?.filter(v => v.active).length || 0 },
+    { id: 'zones', name: 'Zones', icon: MapPin, count: zones.length },
+    { id: 'rates', name: 'Rates', icon: DollarSign, count: categories?.length || 0 },
+    { id: 'rush', name: 'Rush Hrs', icon: Clock, count: rushHours?.filter(r => r.active).length || 0 },
+    { id: 'vacations', name: 'Holidays', icon: Calendar, count: vacations?.filter(v => v.active).length || 0 },
   ];
 
   const handleZoneToggle = async (zoneId, currentStatus) => {
@@ -125,7 +125,7 @@ const ControlPanel = () => {
   };
 
   const handleEmergencyCloseAll = async () => {
-    if (window.confirm('Are you sure you want to close ALL zones? This is an emergency action.')) {
+    if (window.confirm('Are you sure you want to close ALL zones?')) {
       const openZones = zones.filter(z => z.open);
       await handleBulkToggleZones(openZones.map(z => z.id), false);
     }
@@ -143,33 +143,34 @@ const ControlPanel = () => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
+    <div className="space-y-3 sm:space-y-4 px-2 sm:px-4 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Control Panel</h2>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">Manage zones, rates, and schedules</p>
+      <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Control Panel</h2>
+          <p className="text-xs text-gray-600 truncate">Manage zones, rates & schedules</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+        
+        <div className="flex items-center justify-between xs:justify-end gap-2">
           <button
             onClick={handleRefreshAll}
-            className="flex items-center justify-center space-x-2 px-3 py-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors w-full sm:w-auto text-sm sm:text-base"
+            className="flex items-center space-x-1 px-2 py-1.5 text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg text-xs"
           >
-            <RefreshCw className="w-4 h-4" />
-            <span>Refresh</span>
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span className="hidden xs:inline">Refresh</span>
           </button>
-          <div className="text-xs sm:text-sm text-gray-500">
-            Last updated: {new Date().toLocaleTimeString()}
-          </div>
+          <span className="text-[10px] xs:text-xs text-gray-500">
+            {new Date().toLocaleTimeString().slice(0,5)}
+          </span>
         </div>
       </div>
 
-      {/* System Status Cards */}
+      {/* System Status */}
       <SystemStatus zones={zones} rushHours={rushHours || []} vacations={vacations || []} />
 
-      {/* Tabs - Responsive */}
-      <div className="border-b border-gray-200 overflow-x-auto pb-px">
-        <nav className="flex space-x-4 sm:space-x-8 min-w-max sm:min-w-0">
+      {/* Tabs - Horizontal Scroll */}
+      <div className="border-b border-gray-200 overflow-x-auto -mx-2 px-2 scrollbar-hide">
+        <div className="flex space-x-4 min-w-max pb-px">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -178,16 +179,16 @@ const ControlPanel = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-2 sm:px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center space-x-1 sm:space-x-2 transition-colors whitespace-nowrap ${
+                className={`py-2 border-b-2 font-medium text-xs sm:text-sm flex items-center space-x-1.5 transition-colors ${
                   isActive
                     ? 'border-primary-500 text-primary-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <Icon className="w-3.5 h-3.5" />
                 <span>{tab.name}</span>
                 {tab.count > 0 && (
-                  <span className={`inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
                     isActive ? 'bg-primary-100 text-primary-800' : 'bg-gray-100 text-gray-800'
                   }`}>
                     {tab.count}
@@ -196,11 +197,11 @@ const ControlPanel = () => {
               </button>
             );
           })}
-        </nav>
+        </div>
       </div>
 
       {/* Tab Content */}
-      <div className="mt-4 sm:mt-6">
+      <div className="mt-3">
         {activeTab === 'zones' && (
           <ZoneManagement 
             zones={zones}
@@ -241,41 +242,38 @@ const ControlPanel = () => {
         )}
       </div>
 
-      {/* Quick Actions Card */}
-      <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-4 sm:p-6 text-white mt-6">
-        <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+      {/* Quick Actions */}
+      <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-3">
+        <h3 className="text-sm font-semibold text-white mb-2">Quick Actions</h3>
+        <div className="grid grid-cols-3 gap-2">
           <button 
             onClick={handleEmergencyCloseAll}
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-3 sm:p-4 text-left transition-colors"
+            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-2 text-center"
           >
-            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2" />
-            <div className="text-xs sm:text-sm font-medium">Emergency Close All</div>
-            <div className="text-xs opacity-75 mt-0.5 sm:mt-1">Close all zones immediately</div>
+            <AlertTriangle className="w-4 h-4 text-white mx-auto mb-1" />
+            <span className="text-[10px] text-white block">Close All</span>
           </button>
           
           <button 
             onClick={handleOpenAllZones}
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-3 sm:p-4 text-left transition-colors"
+            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-2 text-center"
           >
-            <ToggleRight className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2" />
-            <div className="text-xs sm:text-sm font-medium">Open All Zones</div>
-            <div className="text-xs opacity-75 mt-0.5 sm:mt-1">Open all closed zones</div>
+            <ToggleRight className="w-4 h-4 text-white mx-auto mb-1" />
+            <span className="text-[10px] text-white block">Open All</span>
           </button>
           
           <button 
             onClick={handleRefreshAll}
-            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-3 sm:p-4 text-left transition-colors sm:col-span-1 col-span-2 sm:col-span-1"
+            className="bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg p-2 text-center"
           >
-            <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 mb-1 sm:mb-2" />
-            <div className="text-xs sm:text-sm font-medium">Refresh All Data</div>
-            <div className="text-xs opacity-75 mt-0.5 sm:mt-1">Reload all information</div>
+            <RefreshCw className="w-4 h-4 text-white mx-auto mb-1" />
+            <span className="text-[10px] text-white block">Refresh</span>
           </button>
         </div>
       </div>
 
-      {/* Mobile Bottom Padding */}
-      <div className="h-4 sm:h-0"></div>
+      {/* Bottom Padding */}
+      <div className="h-2"></div>
     </div>
   );
 };

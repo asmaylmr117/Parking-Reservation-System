@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { 
-  BarChart3, 
   Users, 
   Settings, 
-  Calendar,
-  Clock,
   Shield,
-  Car 
+  Car,
+  Activity,
+  Wifi,
+  Zap
 } from 'lucide-react';
 
 // Import admin sub-components
-
 import EmployeeManager from '../components/admin/EmployeeManager';
 import ControlPanel from '../components/admin/ControlPanel';
 import SubscriptionManager from '../components/admin/SubscriptionManager';
@@ -20,7 +19,6 @@ const AdminDashboard = () => {
   const location = useLocation();
   
   const navigation = [
-    
     {
       name: 'Employees',
       href: '/admin/employees',
@@ -48,111 +46,113 @@ const AdminDashboard = () => {
     return location.pathname.startsWith(path);
   };
 
+  // Stats data
+  const quickStats = [
+    { label: 'Active Gates', value: '5', color: 'text-gray-900' },
+    { label: 'Total Zones', value: '10', color: 'text-gray-900' },
+    { label: 'Total Capacity', value: '850', color: 'text-gray-900' },
+    { label: 'Occupancy', value: '~60%', color: 'text-green-600' },
+  ];
+
+  const systemStatus = [
+    { label: 'All systems', status: 'Operational', dotColor: 'bg-green-500' },
+    { label: 'WebSocket', status: 'Connected', dotColor: 'bg-green-500' },
+    { label: 'Real-time', status: 'Active', dotColor: 'bg-blue-500', pulse: true },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
+      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                <Shield className="w-6 h-6 text-red-600" />
+          <div className="py-3 sm:py-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-100 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-gray-600">Manage parking system operations</p>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 truncate">Admin Dashboard</h1>
+                <p className="text-xs sm:text-sm text-gray-600 truncate">Manage parking system operations</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <nav className="space-y-2">
-              {navigation.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.href);
-                
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={`block px-4 py-3 rounded-lg transition-all duration-200 ${
-                      active
-                        ? 'bg-primary-50 border-l-4 border-primary-500 text-primary-700 shadow-sm'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <Icon className={`w-5 h-5 ${active ? 'text-primary-600' : 'text-gray-400'}`} />
-                      <div>
-                        <div className={`font-medium ${active ? 'text-primary-900' : 'text-gray-900'}`}>
-                          {item.name}
-                        </div>
-                        <div className={`text-sm ${active ? 'text-primary-600' : 'text-gray-500'}`}>
-                          {item.description}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </nav>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        
+        <nav className="flex space-x-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+          {navigation.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href);
+            
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex-shrink-0 px-3 py-2 rounded-lg transition-all ${
+                  active
+                    ? 'bg-primary-50 text-primary-700 shadow-sm border-b-2 border-primary-500'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <Icon className={`w-4 h-4 ${active ? 'text-primary-600' : 'text-gray-400'}`} />
+                  <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                    {item.name}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
 
-            {/* Quick Stats */}
-            <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Active Gates</span>
-                  <span className="font-semibold text-gray-900">5</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Total Zones</span>
-                  <span className="font-semibold text-gray-900">10</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Total Capacity</span>
-                  <span className="font-semibold text-gray-900">850</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Current Occupancy</span>
-                  <span className="font-semibold text-green-600">~60%</span>
-                </div>
-              </div>
+        
+        <div className="mb-6">
+          <Routes>
+            <Route path="employees" element={<EmployeeManager />} />
+            <Route path="subscriptions" element={<SubscriptionManager />} />
+            <Route path="control" element={<ControlPanel />} />
+          </Routes>
+        </div>
+
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Quick Stats */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center space-x-2 mb-3">
+              <Activity className="w-5 h-5 text-primary-600" />
+              <h3 className="text-base font-semibold text-gray-900">Quick Stats</h3>
             </div>
-
-            {/* System Status */}
-            <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">System Status</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-700">All systems operational</span>
+            <div className="grid grid-cols-2 gap-4">
+              {quickStats.map((stat, index) => (
+                <div key={index}>
+                  <span className="text-xs text-gray-500 block">{stat.label}</span>
+                  <span className={`text-lg sm:text-xl font-bold ${stat.color}`}>
+                    {stat.value}
+                  </span>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-700">WebSocket connected</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-gray-700">Real-time updates active</span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <Routes>
-             
-              <Route path="employees" element={<EmployeeManager />} />
-              <Route path="subscriptions" element={<SubscriptionManager />} />
-              <Route path="control" element={<ControlPanel />} />
-            </Routes>
+          {/* System Status */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div className="flex items-center space-x-2 mb-3">
+              <Wifi className="w-5 h-5 text-primary-600" />
+              <h3 className="text-base font-semibold text-gray-900">System Status</h3>
+            </div>
+            <div className="space-y-3">
+              {systemStatus.map((item, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">{item.label}</span>
+                  <div className="flex items-center">
+                    <div className={`w-2 h-2 rounded-full ${item.dotColor} ${item.pulse ? 'animate-pulse' : ''}`}></div>
+                    <span className="text-xs text-gray-500 ml-2">{item.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
