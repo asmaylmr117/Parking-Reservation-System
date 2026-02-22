@@ -1,7 +1,7 @@
 import useGateStore from '../stores/gateStore';
 import toast from 'react-hot-toast';
 
-const WS_URL = 'wss://exuberant-wallis-alanani-17867927.koyeb.app/api/v1/ws';
+const WS_URL = 'http://localhost:3000/api/v1/ws';
 const RECONNECT_INTERVAL = 3000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 
