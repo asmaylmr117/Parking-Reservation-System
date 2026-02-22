@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import useAuthStore from '../stores/authStore';
 import toast from 'react-hot-toast';
  
-const BASE_URL = 'https://exuberant-wallis-alanani-17867927.koyeb.app/api/v1'; 
+const BASE_URL = 'http://localhost:3000/api/v1'; 
 
 const api = axios.create({
   baseURL: BASE_URL,
