@@ -1,7 +1,7 @@
 import useGateStore from '../stores/gateStore';
 import toast from 'react-hot-toast';
 
-const WS_URL = 'http://localhost:3000/api/v1/ws';
+const WS_URL = 'https://parking-reservation-system-backend-production.up.railway.app/api/v1/ws';
 const RECONNECT_INTERVAL = 3000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 
